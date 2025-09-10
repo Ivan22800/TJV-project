@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, Text, VStack } from "@chakra-ui/react"
 import { Avatar, HStack } from "@chakra-ui/react"
 
@@ -37,7 +36,7 @@ export default function Post({ time, author, text }) {
                     <Text fontSize="xs" color="gray.500">{formatTime(time)}</Text>
                 </VStack>
             </HStack>
-            <Text fontSize="md" mt={3}>{text}</Text>
+            <Text fontSize="md" mt={3} whiteSpace="pre-wrap">{text}</Text>
         </Box>
     )
 }

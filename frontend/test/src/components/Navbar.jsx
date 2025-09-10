@@ -2,8 +2,10 @@ import { Flex, Box, Input, Image, InputGroup, Heading } from "@chakra-ui/react";
 import { Avatar, Menu, Portal } from "@chakra-ui/react"
 import logo from "../assets/logo.svg";
 import { LuSearch } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 
 export default function NavBar() {
+  const navigate = useNavigate();
   return (
     <Flex bg="white" justify="space-between" align="center" h="60px" boxShadow="md" px={4}>
       <Box w="150px">
@@ -30,8 +32,9 @@ export default function NavBar() {
           <Portal>
             <Menu.Positioner>
               <Menu.Content>
-                <Menu.Item value="account">Account</Menu.Item>
-                <Menu.Item value="settings">Settings</Menu.Item>
+                <Menu.Item value="settings" onClick={() => navigate('/settings')}>
+                  Settings
+                </Menu.Item>
                 <Menu.Item value="logout">Logout</Menu.Item>
               </Menu.Content>
             </Menu.Positioner>
