@@ -41,7 +41,6 @@ export default function Feed() {
                             border="0px"
                             minH="40px"
                             fontSize="md"
-                            focusBorderColor="transparent"
                             outline="none"
                             value={postText}
                             onChange={e => setPostText(e.target.value)}
