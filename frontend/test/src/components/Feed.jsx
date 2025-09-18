@@ -10,6 +10,7 @@ export default function Feed() {
     const addNewPost = () => {
         if (!postText.trim()) return;
         const newPost = {
+            id: crypto.randomUUID(), 
             time: Date.now(),
             author: "George Floyd",
             text: postText
@@ -61,7 +62,7 @@ export default function Feed() {
             </Box>
             <VStack align="stretch" spacing={4} my="4">
                 {posts.map(post => (
-                    <Post time={post.time} author={post.author} text={post.text} />
+                    <Post key={post.id} id={post.id} time={post.time} author={post.author} text={post.text} />
                 ))}
             </VStack>
         </>

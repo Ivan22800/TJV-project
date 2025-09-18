@@ -6,7 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 const menuItems = [
     { path: "/feed", label: "Feed", icon: <MdRssFeed /> },
     { path: "/groups", label: "My Groups", icon: <MdOutlineGroup /> },
-    { path: "/my-posts", label: "My Posts", icon: <CgNotes /> },
+    { path: "/feed-my-posts", label: "My Posts", icon: <CgNotes /> },
 ];
 
 export default function SidebarLeft() {

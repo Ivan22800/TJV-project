@@ -1,7 +1,15 @@
-import { Box, Text, VStack } from "@chakra-ui/react"
-import { Avatar, HStack } from "@chakra-ui/react"
+import { Box, Text, VStack, HStack, Separator } from "@chakra-ui/react"
+import { Avatar } from "@chakra-ui/react"
+import { useState } from "react";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { BiCommentDetail } from "react-icons/bi";
 
-export default function Post({ time, author, text }) {
+
+
+export default function Post({ id, time, author, text }) {
+    const [likes, setLikes] = useState(0);
+    const [liked, setLiked] = useState(false);
+
     function formatTime(timestamp) {
         const diff = Date.now() - timestamp;
         const seconds = Math.floor(diff / 1000);
@@ -13,6 +21,15 @@ export default function Post({ time, author, text }) {
         if (minutes < 60) return `${minutes}m ago`;
         if (hours < 24) return `${hours}h ago`;
         return `${days}d ago`;
+    }
+
+    function handleLike() {
+        if (liked) {
+            setLikes(likes - 1);
+        } else {
+            setLikes(likes + 1);
+        }
+        setLiked(!liked);
     }
     return (
         <Box
@@ -37,6 +54,21 @@ export default function Post({ time, author, text }) {
                 </VStack>
             </HStack>
             <Text fontSize="md" mt={3} whiteSpace="pre-wrap">{text}</Text>
+            <Separator my={2} />
+            <HStack spacing={8} mt={2}>
+                <HStack spacing={2} cursor="pointer" onClick={handleLike}>
+                    {liked ? (
+                        <AiFillHeart color="#ed4956" size={22} />
+                    ) : (
+                        <AiOutlineHeart color="gray" size={22} />
+                    )}
+                    <Text fontWeight="medium">{likes}</Text>
+                </HStack>
+                <HStack spacing={2} cursor="pointer">
+                    <BiCommentDetail color="gray" size={22} />
+                    <Text fontWeight="medium">0</Text>
+                </HStack>
+            </HStack>
         </Box>
     )
 }

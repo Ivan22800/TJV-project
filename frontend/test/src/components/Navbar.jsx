@@ -9,7 +9,7 @@ export default function NavBar() {
   return (
     <Flex bg="white" justify="space-between" align="center" h="60px" boxShadow="md" px={4}>
       <Box w="150px">
-        <Heading fontWeight="bold" textAlign="left" fontSize="xl">
+        <Heading fontWeight="bold" textAlign="left" fontSize="xl" cursor="pointer" onClick={() => navigate('/feed')}>
           <Image src={logo} alt="Logo" boxSize="30px" display="inline-block" mr={2} />
           Flow
         </Heading>

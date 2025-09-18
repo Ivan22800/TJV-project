@@ -5,6 +5,7 @@ import Feed from './components/Feed';
 import Groups from './components/Groups';
 import MyPosts from './components/MyPosts';
 import Settings from './components/Settings';
+import FeedMyPosts from './components/FeedMyPosts';
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
               <Route path="/" element={<Feed />} />
               <Route path="/feed" element={<Feed />} />
               <Route path="/groups" element={<Groups />} />
-              <Route path="/my-posts" element={<MyPosts />} />
+              <Route path="/feed-my-posts" element={<FeedMyPosts />} />
             </Routes>
           </Layout>
         } />
