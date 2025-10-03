@@ -1,14 +1,15 @@
-import { Box, Text, VStack, HStack, Separator } from "@chakra-ui/react"
-import { Avatar } from "@chakra-ui/react"
+import { Box, Text, VStack, HStack, Separator, Avatar, Dialog, Portal, CloseButton } from "@chakra-ui/react"
 import { useState } from "react";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
+import { Link } from "react-router-dom";
 
 
 
 export default function Post({ id, time, author, text }) {
     const [likes, setLikes] = useState(0);
     const [liked, setLiked] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     function formatTime(timestamp) {
         const diff = Date.now() - timestamp;
@@ -46,7 +47,7 @@ export default function Post({ id, time, author, text }) {
             <HStack align="start" spacing={4}>
                 <Avatar.Root boxSize="40px">
                     <Avatar.Fallback name="Segun Adebayo" />
-                    <Avatar.Image src="https://bit.ly/sage-adebayo" />
+                    <Avatar.Image src="https://upload.wikimedia.org/wikipedia/commons/6/68/Joe_Biden_presidential_portrait.jpg" />
                 </Avatar.Root>
                 <VStack align="start" spacing={0} flex="1">
                     <Text fontWeight="bold" fontSize="md">{author}</Text>
@@ -58,7 +59,7 @@ export default function Post({ id, time, author, text }) {
             <HStack spacing={8} mt={2}>
                 <HStack spacing={2} cursor="pointer" onClick={handleLike}>
                     {liked ? (
-                        <AiFillHeart color="#ed4956" size={22} />
+                        <AiFillHeart color="pink" size={22} />
                     ) : (
                         <AiOutlineHeart color="gray" size={22} />
                     )}

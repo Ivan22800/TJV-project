@@ -12,9 +12,9 @@ function SettingSwitch({ title, description }) {
                     <Text fontSize="xs" color="gray.500">{description}</Text>
                 )}
             </VStack>
-            <Switch.Root colorPalette="blue" >
+            <Switch.Root colorPalette="teal" >
                 <Switch.HiddenInput />
-                <Switch.Control _checked={{ bg: "blue.400" }} />
+                <Switch.Control _checked={{ bg: "teal.400" }} />
             </Switch.Root>
         </Group>
     )
@@ -24,8 +24,8 @@ function CheckBox({ text }) {
     return (
         <Group gap="10" width="full">
             <VStack align="start" spacing={0} flex="1" mt={2}>
-                <Checkbox.Root colorPalette="blue">
-                    <Checkbox.Control _checked={{ bg: "blue.400", borderColor: "blue.400", color: "white" }} />
+                <Checkbox.Root colorPalette="teal">
+                    <Checkbox.Control _checked={{ bg: "teal.400", borderColor: "teal.400", color: "white" }} />
                     <Checkbox.Label>
                         <Text fontWeight="normal" fontSize="sm">{text}</Text>
                     </Checkbox.Label>
@@ -59,15 +59,15 @@ export default function Settings() {
                         <HStack spacing={4}>
                             <Avatar.Root boxSize="120px">
                                 <Avatar.Fallback name="Segun Adebayo" />
-                                <Avatar.Image src="https://bit.ly/sage-adebayo" />
+                                <Avatar.Image src="https://upload.wikimedia.org/wikipedia/commons/6/68/Joe_Biden_presidential_portrait.jpg" />
                             </Avatar.Root>
                             <VStack align="start" spacing={0} flex="1" ml={6}>
                                 <Button
-                                    colorScheme="blue"
+                                    colorScheme="teal"
                                     variant="outline"
-                                    bg="blue.400"
+                                    bg="teal.400"
                                     color="white"
-                                    _hover={{ bg: "blue.500" }}
+                                    _hover={{ bg: "teal.500" }}
                                     borderRadius="xl"
                                 >
                                     Change Avatar</Button>
@@ -80,13 +80,13 @@ export default function Settings() {
                                     <Field.Label>
                                         Full Name
                                     </Field.Label>
-                                    <Input placeholder="John Doe" variant="subtle" />
+                                    <Input placeholder="Joe Biden" variant="subtle" />
                                 </Field.Root>
                                 <Field.Root required>
                                     <Field.Label>
                                         Username
                                     </Field.Label>
-                                    <Input placeholder="johndoe" variant="subtle" />
+                                    <Input placeholder="joebiden" variant="subtle" />
                                 </Field.Root>
                             </Group>
                         </HStack>
@@ -108,11 +108,11 @@ export default function Settings() {
                                 <PasswordInput size="md" />
                             </Field.Root>
                             <Button
-                                colorScheme="blue"
+                                colorScheme="teal"
                                 variant="outline"
-                                bg="blue.400"
+                                bg="teal.400"
                                 color="white"
-                                _hover={{ bg: "blue.500" }}
+                                _hover={{ bg: "teal.500" }}
                                 borderRadius="xl"
                                 mt={8}
                             >
@@ -138,7 +138,7 @@ export default function Settings() {
                         <CheckBox text="Push Notifications" />
 
                         <Button
-                            colorScheme="blue"
+                            colorScheme="teal"
                             variant="outline"
                             borderRadius="xl"
                             onClick={() => navigate('/')}

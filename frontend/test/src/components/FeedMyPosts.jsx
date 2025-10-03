@@ -7,17 +7,6 @@ export default function Feed() {
     const [posts, setPosts] = useState([]);
     const [postText, setPostText] = useState("");
 
-    const addNewPost = () => {
-        if (!postText.trim()) return;
-        const newPost = {
-            id: crypto.randomUUID(),
-            time: Date.now(),
-            author: "George Floyd",
-            text: postText
-        };
-        setPosts([newPost, ...posts]);
-        setPostText("");
-    };
     return (
         <>
             <Box
@@ -31,6 +20,22 @@ export default function Feed() {
                 boxShadow="md"
                 minH="100px"
             >
+                <VStack align="stretch" spacing={4}>
+                    <HStack align="start" spacing={4}>
+                        <Avatar.Root boxSize="80px">
+                            <Avatar.Fallback name="Segun Adebayo" />
+                            <Avatar.Image src="https://upload.wikimedia.org/wikipedia/commons/6/68/Joe_Biden_presidential_portrait.jpg" />
+                        </Avatar.Root>
+                        <VStack align="start" spacing={0} flex="1">
+                            <Text fontSize="l">Name</Text>
+                            <HStack spacing={2}>
+                                <Text fontSize="m">Posts: 10</Text>
+                                <Text fontSize="m">Followers: 100</Text>
+                                <Text fontSize="m">Following: 50</Text>
+                            </HStack>
+                        </VStack>
+                    </HStack>
+                </VStack>
             </Box>
             <VStack align="stretch" spacing={4} my="4">
                 {posts.map(post => (

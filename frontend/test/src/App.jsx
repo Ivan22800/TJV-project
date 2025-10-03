@@ -3,7 +3,6 @@ import Layout from './components/Layout';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Feed from './components/Feed';
 import Groups from './components/Groups';
-import MyPosts from './components/MyPosts';
 import Settings from './components/Settings';
 import FeedMyPosts from './components/FeedMyPosts';
 

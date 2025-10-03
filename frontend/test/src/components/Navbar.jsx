@@ -26,7 +26,7 @@ export default function NavBar() {
           <Menu.Trigger rounded="full" focusRing="outside">
             <Avatar.Root size="sm">
               <Avatar.Fallback name="Segun Adebayo" />
-              <Avatar.Image src="https://bit.ly/sage-adebayo" />
+              <Avatar.Image src="https://upload.wikimedia.org/wikipedia/commons/6/68/Joe_Biden_presidential_portrait.jpg" />
             </Avatar.Root>
           </Menu.Trigger>
           <Portal>
