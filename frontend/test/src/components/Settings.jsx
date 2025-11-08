@@ -12,9 +12,9 @@ function SettingSwitch({ title, description }) {
                     <Text fontSize="xs" color="gray.500">{description}</Text>
                 )}
             </VStack>
-            <Switch.Root colorPalette="teal" >
+            <Switch.Root colorPalette="purple" >
                 <Switch.HiddenInput />
-                <Switch.Control _checked={{ bg: "teal.400" }} />
+                <Switch.Control _checked={{ bg: "purple.400" }} />
             </Switch.Root>
         </Group>
     )
@@ -24,8 +24,8 @@ function CheckBox({ text }) {
     return (
         <Group gap="10" width="full">
             <VStack align="start" spacing={0} flex="1" mt={2}>
-                <Checkbox.Root colorPalette="teal">
-                    <Checkbox.Control _checked={{ bg: "teal.400", borderColor: "teal.400", color: "white" }} />
+                <Checkbox.Root colorPalette="purple">
+                    <Checkbox.Control _checked={{ bg: "purple.400", borderColor: "purple.400", color: "white" }} />
                     <Checkbox.Label>
                         <Text fontWeight="normal" fontSize="sm">{text}</Text>
                     </Checkbox.Label>
@@ -59,15 +59,15 @@ export default function Settings() {
                         <HStack spacing={4}>
                             <Avatar.Root boxSize="120px">
                                 <Avatar.Fallback name="Segun Adebayo" />
-                                <Avatar.Image src="https://upload.wikimedia.org/wikipedia/commons/6/68/Joe_Biden_presidential_portrait.jpg" />
+                                <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
                             </Avatar.Root>
                             <VStack align="start" spacing={0} flex="1" ml={6}>
                                 <Button
-                                    colorScheme="teal"
+                                    colorScheme="purple"
                                     variant="outline"
-                                    bg="teal.400"
+                                    bg="purple.400"
                                     color="white"
-                                    _hover={{ bg: "teal.500" }}
+                                    _hover={{ bg: "purple.500" }}
                                     borderRadius="xl"
                                 >
                                     Change Avatar</Button>
@@ -80,13 +80,13 @@ export default function Settings() {
                                     <Field.Label>
                                         Full Name
                                     </Field.Label>
-                                    <Input placeholder="Joe Biden" variant="subtle" />
+                                    <Input placeholder="John Pork" variant="subtle" />
                                 </Field.Root>
                                 <Field.Root required>
                                     <Field.Label>
                                         Username
                                     </Field.Label>
-                                    <Input placeholder="joebiden" variant="subtle" />
+                                    <Input placeholder="johnpork" variant="subtle" />
                                 </Field.Root>
                             </Group>
                         </HStack>
@@ -108,11 +108,11 @@ export default function Settings() {
                                 <PasswordInput size="md" />
                             </Field.Root>
                             <Button
-                                colorScheme="teal"
+                                colorScheme="purple"
                                 variant="outline"
-                                bg="teal.400"
+                                bg="purple.400"
                                 color="white"
-                                _hover={{ bg: "teal.500" }}
+                                _hover={{ bg: "purple.500" }}
                                 borderRadius="xl"
                                 mt={8}
                             >
@@ -138,10 +138,10 @@ export default function Settings() {
                         <CheckBox text="Push Notifications" />
 
                         <Button
-                            colorScheme="teal"
+                            colorScheme="purple"
                             variant="outline"
                             borderRadius="xl"
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/feed')}
                             alignSelf="flex-start"
                             mt={4}
                         >

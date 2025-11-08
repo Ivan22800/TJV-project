@@ -1,24 +1,25 @@
-import Navbar from './components/Navbar';
 import Layout from './components/Layout';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Feed from './components/Feed';
 import Groups from './components/Groups';
 import Settings from './components/Settings';
 import FeedMyPosts from './components/FeedMyPosts';
+import Register from './components/Register';
+import Login from './components/Login';
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
       <Routes>
+        <Route path="/" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/*" element={
+        <Route path="/feed/*" element={
           <Layout>
             <Routes>
-              <Route path="/" element={<Feed />} />
-              <Route path="/feed" element={<Feed />} />
-              <Route path="/groups" element={<Groups />} />
-              <Route path="/feed-my-posts" element={<FeedMyPosts />} />
+              <Route index element={<Feed />} />
+              <Route path="groups" element={<Groups />} />
+              <Route path="my-posts" element={<FeedMyPosts />} />
             </Routes>
           </Layout>
         } />

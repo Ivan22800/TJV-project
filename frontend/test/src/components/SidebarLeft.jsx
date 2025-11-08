@@ -6,8 +6,8 @@ import { CgProfile } from "react-icons/cg";
 
 const menuItems = [
     { path: "/feed", label: "Feed", icon: <MdRssFeed /> },
-    { path: "/groups", label: "My Groups", icon: <MdOutlineGroup /> },
-    { path: "/feed-my-posts", label: "My Profile", icon: <CgProfile /> },
+    { path: "/feed/groups", label: "My Groups", icon: <MdOutlineGroup /> },
+    { path: "/feed/my-posts", label: "My Profile", icon: <CgProfile /> },
 ];
 
 export default function SidebarLeft() {
@@ -35,17 +35,17 @@ export default function SidebarLeft() {
                             as={Link}
                             to={item.path}
                             variant="ghost"
-                            colorScheme="teal"
-                            color={active ? "teal.500" : "gray.600"}
+                            colorScheme="purple"
+                            color={active ? "purple.500" : "gray.600"}
                             fontWeight={active ? "semibold" : "normal"}
-                            bg={active ? "teal.50" : "transparent"}
+                            bg={active ? "purple.50" : "transparent"}
                             _hover={{
-                                bg: active ? "teal.100" : "gray.100",
-                                color: active ? "teal.600" : "gray.700"
+                                bg: active ? "purple.100" : "gray.100",
+                                color: active ? "purple.600" : "gray.700"
                             }}
                             _active={{
-                                bg: "teal.100",
-                                color: "teal.700"
+                                bg: "purple.100",
+                                color: "purple.700"
                             }}
                             justifyContent="flex-start"
                             borderRadius="xl"
@@ -56,11 +56,11 @@ export default function SidebarLeft() {
                 })}
                 <Box h={4} />
                 <Button
-                    colorScheme="teal"
+                    colorScheme="purple"
                     variant="solid"
-                    bg="teal.500"
+                    bg="purple.500"
                     color="white"
-                    _hover={{ bg: "teal.600" }}
+                    _hover={{ bg: "purple.600" }}
                     borderRadius="xl"
                 >
                     Create Post

@@ -26,7 +26,7 @@ export default function NavBar() {
           <Menu.Trigger rounded="full" focusRing="outside">
             <Avatar.Root size="sm">
               <Avatar.Fallback name="Segun Adebayo" />
-              <Avatar.Image src="https://upload.wikimedia.org/wikipedia/commons/6/68/Joe_Biden_presidential_portrait.jpg" />
+              <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
             </Avatar.Root>
           </Menu.Trigger>
           <Portal>

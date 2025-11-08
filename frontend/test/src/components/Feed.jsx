@@ -12,7 +12,7 @@ export default function Feed() {
         const newPost = {
             id: crypto.randomUUID(), 
             time: Date.now(),
-            author: "Joe Biden",
+            author: "John Pork",
             text: postText
         };
         setPosts([newPost, ...posts]);
@@ -34,7 +34,7 @@ export default function Feed() {
                     <HStack align="start" spacing={4}>
                         <Avatar.Root boxSize="40px">
                             <Avatar.Fallback name="Segun Adebayo" />
-                            <Avatar.Image src="https://upload.wikimedia.org/wikipedia/commons/6/68/Joe_Biden_presidential_portrait.jpg" />
+                            <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
                         </Avatar.Root>
                         <Textarea
                             resize="none"
@@ -48,11 +48,11 @@ export default function Feed() {
                         />
                     </HStack>
                     <Button
-                        bg="teal.500"
+                        bg="purple.500"
                         color="white"
                         borderRadius="xl"
                         alignSelf="flex-end"
-                        _hover={{ bg: "teal.600" }}
+                        _hover={{ bg: "purple.600" }}
                         onClick={addNewPost}
                     >
                         Publish

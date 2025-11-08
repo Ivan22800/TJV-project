@@ -46,7 +46,7 @@ export default function Post({ id, time, text }) {
             <HStack align="start" spacing={4}>
                 <Avatar.Root boxSize="40px">
                     <Avatar.Fallback name="Segun Adebayo" />
-                    <Avatar.Image src="https://bit.ly/sage-adebayo" />
+                    <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
                 </Avatar.Root>
                 <VStack align="start" spacing={0} flex="1">
                     <Text fontSize="xs" color="gray.500">{formatTime(time)}</Text>
