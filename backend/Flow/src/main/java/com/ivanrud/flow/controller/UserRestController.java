@@ -4,6 +4,7 @@ import com.ivanrud.flow.service.UserService;
 import com.ivanrud.flow.model.User;
 import com.ivanrud.flow.dto.RegisterRequest;
 import com.ivanrud.flow.dto.UserResponse;
+import com.ivanrud.flow.dto.LoginUserDTO;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -40,5 +41,11 @@ public class UserRestController {
                 registeredUser.getLastName());
 
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> loginUser(@RequestBody LoginUserDTO loginUserDTO) {
+        UserResponse user = userService.loginUser(loginUserDTO);
+        return ResponseEntity.ok(user);
     }
 }

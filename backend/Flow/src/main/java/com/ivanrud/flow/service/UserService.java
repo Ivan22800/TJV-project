@@ -2,6 +2,9 @@ package com.ivanrud.flow.service;
 
 import com.ivanrud.flow.model.User;
 import com.ivanrud.flow.repository.UserRepository;
+import com.ivanrud.flow.dto.LoginUserDTO;
+import com.ivanrud.flow.dto.UserResponse;
+
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,6 +64,22 @@ public class UserService {
         }
 
         return userRepository.save(existingUser);
+    }
+
+    public UserResponse loginUser(LoginUserDTO loginUserDTO) {
+        User user = userRepository.findByUsername(loginUserDTO.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(loginUserDTO.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName());
     }
 
     /**
