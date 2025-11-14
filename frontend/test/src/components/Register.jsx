@@ -18,7 +18,7 @@ export default function Register() {
         const username = document.querySelector('input[name="username"]').value;
         const password = document.querySelector('input[name="password"]').value;
 
-        fetch('http://localhost:8080/api/users/register', {
+        fetch('http://localhost:8080/api/auth/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -31,18 +31,33 @@ export default function Register() {
                 password,
             }),
         })
-            .then(response => {
+            .then(async response => {
+                let errorMessage = 'Registration failed';
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        const errorData = await response.json();
+                        // Если ошибка валидации, показываем все ошибки
+                        if (typeof errorData === 'object') {
+                            errorMessage = Object.values(errorData).join(', ') || 'Registration failed';
+                        } else {
+                            errorMessage = JSON.stringify(errorData);
+                        }
+                    } else {
+                        errorMessage = await response.text() || 'Registration failed';
+                    }
+                    throw new Error(errorMessage);
                 }
-                return response.json();
+                return await response.text(); // AuthController возвращает String, а не JSON
             })
-            .then(data => {
-                console.log('Success:', data);
+            .then(message => {
+                console.log('Success:', message);
+                alert('Registration successful!');
                 navigate('/feed');
             })
             .catch((error) => {
-                console.error('Error:', error);
+                console.error('Error:', error.message);
+                alert(error.message); // Показываем ошибку пользователю
             });
     }
 

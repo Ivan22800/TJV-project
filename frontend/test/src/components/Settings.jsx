@@ -2,6 +2,7 @@ import { Box, Text, VStack, HStack, Heading, Button, Container, Avatar, Field, I
 import { Select } from "@chakra-ui/react"
 import { useNavigate } from "react-router-dom";
 import { PasswordInput } from "../components/ui/password-input"
+import { useState, useEffect } from "react";
 
 function SettingSwitch({ title, description }) {
     return (
@@ -39,6 +40,83 @@ function CheckBox({ text }) {
 
 export default function Settings() {
     const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: ''
+    });
+
+    useEffect(() => {
+        // Загружаем данные пользователя при монтировании компонента
+        const fetchUserData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:8080/api/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Токен невалидный, перенаправляем на регистрацию
+                        localStorage.removeItem('token');
+                        navigate('/');
+                        return;
+                    }
+                    throw new Error('Failed to fetch user data');
+                }
+
+                const userData = await response.json();
+                setUser(userData);
+                setFormData({
+                    firstName: userData.firstName || '',
+                    lastName: userData.lastName || '',
+                    username: userData.username || '',
+                    email: userData.email || ''
+                });
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, [navigate]);
+
+    const handleInputChange = (field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    if (loading) {
+        return (
+            <Box
+                w="100%"
+                minH="calc(100vh - 60px)"
+                bg="gray.50"
+                p={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+            >
+                <Text>Loading...</Text>
+            </Box>
+        );
+    }
 
     return (
         <Box
@@ -78,27 +156,53 @@ export default function Settings() {
                             <Group gap="10" width="full">
                                 <Field.Root required>
                                     <Field.Label>
-                                        Full Name
+                                        First Name
                                     </Field.Label>
-                                    <Input placeholder="John Pork" variant="subtle" />
+                                    <Input
+                                        placeholder="John"
+                                        variant="subtle"
+                                        value={formData.firstName}
+                                        onChange={(e) => handleInputChange('firstName', e.target.value)}
+                                    />
                                 </Field.Root>
                                 <Field.Root required>
                                     <Field.Label>
-                                        Username
+                                        Last Name
                                     </Field.Label>
-                                    <Input placeholder="johnpork" variant="subtle" />
+                                    <Input
+                                        placeholder="Pork"
+                                        variant="subtle"
+                                        value={formData.lastName}
+                                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                                    />
                                 </Field.Root>
                             </Group>
                         </HStack>
                         <HStack spacing={4} align="center" mt={4}>
-                            <HStack gap="10" width="full">
+                            <Group gap="10" width="full">
+                                <Field.Root required>
+                                    <Field.Label>
+                                        Username
+                                    </Field.Label>
+                                    <Input
+                                        placeholder="johnpork"
+                                        variant="subtle"
+                                        value={formData.username}
+                                        onChange={(e) => handleInputChange('username', e.target.value)}
+                                    />
+                                </Field.Root>
                                 <Field.Root required>
                                     <Field.Label>
                                         Email
                                     </Field.Label>
-                                    <Input placeholder="me@example.com" variant="subtle" />
+                                    <Input
+                                        placeholder="me@example.com"
+                                        variant="subtle"
+                                        value={formData.email}
+                                        onChange={(e) => handleInputChange('email', e.target.value)}
+                                    />
                                 </Field.Root>
-                            </HStack>
+                            </Group>
                         </HStack>
                         <Group gap="10" width="full" mt={4}>
                             <Field.Root required>

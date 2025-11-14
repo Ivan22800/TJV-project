@@ -58,7 +58,6 @@ public class UserService {
         existingUser.setFirstName(updatedUser.getFirstName());
         existingUser.setLastName(updatedUser.getLastName());
 
-        // Обновление пароля (если передан)
         if (updatedUser.getPassword() != null && !updatedUser.getPassword().isBlank()) {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
@@ -82,9 +81,6 @@ public class UserService {
                 user.getLastName());
     }
 
-    /**
-     * Валидация базовых полей
-     */
     private void validateUser(User user) {
         if (user.getUsername() == null || user.getUsername().isBlank()) {
             throw new IllegalArgumentException("Username cannot be empty");
@@ -95,6 +91,18 @@ public class UserService {
         if (user.getPassword() == null || user.getPassword().length() < 6) {
             throw new IllegalArgumentException("Password must be at least 6 characters");
         }
+    }
+    
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName());
     }
 
     public Optional<User> findByUsername(String username) {

@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/auth")
 @CrossOrigin(origins = "http://localhost:5173")
 public class UserRestController {
 
@@ -47,5 +47,11 @@ public class UserRestController {
     public ResponseEntity<UserResponse> loginUser(@RequestBody LoginUserDTO loginUserDTO) {
         UserResponse user = userService.loginUser(loginUserDTO);
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        UserResponse userResponse = userService.getUserById(id);
+        return ResponseEntity.ok(userResponse);
     }
 }

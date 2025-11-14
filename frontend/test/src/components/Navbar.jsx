@@ -6,6 +6,14 @@ import { useNavigate } from "react-router-dom";
 
 export default function NavBar() {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Очищаем токен из localStorage
+    localStorage.removeItem('token');
+    // Перенаправляем на страницу регистрации
+    navigate('/');
+  };
+
   return (
     <Flex bg="white" justify="space-between" align="center" h="60px" boxShadow="md" px={4}>
       <Box w="150px">
@@ -35,7 +43,7 @@ export default function NavBar() {
                 <Menu.Item value="settings" onClick={() => navigate('/settings')}>
                   Settings
                 </Menu.Item>
-                <Menu.Item value="logout">Logout</Menu.Item>
+                <Menu.Item value="logout" onClick={handleLogout}>Logout</Menu.Item>
               </Menu.Content>
             </Menu.Positioner>
           </Portal>

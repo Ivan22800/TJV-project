@@ -15,7 +15,7 @@ export default function Login() {
         const username = document.querySelector('input[name="username"]').value;
         const password = document.querySelector('input[name="password"]').value;
 
-        fetch('http://localhost:8080/api/users/login', {
+        fetch('http://localhost:8080/api/auth/signin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -26,15 +26,18 @@ export default function Login() {
             }),
         })
             .then(async response => {
+                const responseText = await response.text();
                 if (!response.ok) {
-                    const errorData = await response.text();
-                    console.error('Server error:', errorData);
-                    throw new Error(errorData || 'Login failed');
+                    console.error('Server error:', responseText);
+                    alert(responseText || 'Login failed');
+                    throw new Error(responseText || 'Login failed');
                 }
-                return response.json();
+                return responseText; // AuthController возвращает String (токен), а не JSON
             })
-            .then(data => {
-                console.log('Login successful:', data);
+            .then(token => {
+                console.log('Login successful, token:', token);
+                // Сохраняем токен в localStorage
+                localStorage.setItem('token', token);
                 navigate('/feed');
             })
             .catch((error) => {
