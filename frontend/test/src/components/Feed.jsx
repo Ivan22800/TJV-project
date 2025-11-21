@@ -1,16 +1,17 @@
 import { Box, Text, VStack } from "@chakra-ui/react"
 import { Textarea, Avatar, HStack, Button } from "@chakra-ui/react"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Post from "./Post";
 
 export default function Feed() {
     const [posts, setPosts] = useState([]);
     const [postText, setPostText] = useState("");
+    const token = localStorage.getItem('token');
 
     const addNewPost = () => {
         if (!postText.trim()) return;
         const newPost = {
-            id: crypto.randomUUID(), 
+            id: crypto.randomUUID(),
             time: Date.now(),
             author: "John Pork",
             text: postText
@@ -18,6 +19,49 @@ export default function Feed() {
         setPosts([newPost, ...posts]);
         setPostText("");
     };
+
+    const newPost = async () => {
+        if (!postText.trim()) return;
+        try {
+            const response = await fetch('http://localhost:8080/post/new', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    content: postText,
+                }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to create post');
+            }
+            const createdPost = await response.json();
+            setPosts([createdPost, ...posts]);
+            setPostText("");
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            const response = await fetch('http://localhost:8080/post/my', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch posts');
+            }
+            const data = await response.json();
+            setPosts(data);
+        };
+        fetchPosts();
+    }, []);
+
     return (
         <>
             <Box
@@ -53,7 +97,8 @@ export default function Feed() {
                         borderRadius="xl"
                         alignSelf="flex-end"
                         _hover={{ bg: "purple.600" }}
-                        onClick={addNewPost}
+                        // onClick={addNewPost}
+                        onClick={newPost}
                     >
                         Publish
                     </Button>

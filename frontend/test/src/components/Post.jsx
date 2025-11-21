@@ -34,12 +34,12 @@ export default function Post({ id, time, author, text }) {
     }
 
     const addNewComment = () => {
-        if (!postText.trim()) return;
+        if (!commentText.trim()) return;
         const newComment = {
-            id: crypto.randomUUID(), 
+            id: crypto.randomUUID(),
             time: Date.now(),
             author: "John Pork",
-            text: postText
+            text: commentText
         };
         setComments([newComment, ...comments]);
         setCommentText("");
@@ -62,7 +62,7 @@ export default function Post({ id, time, author, text }) {
                     <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
                 </Avatar.Root>
                 <VStack align="start" spacing={0} flex="1">
-                    <Text fontWeight="bold" fontSize="md">{author}</Text>
+                    <Text fontWeight="bold" fontSize="md">{author?.username || author}</Text>
                     <Text fontSize="xs" color="gray.500">{formatTime(time)}</Text>
                 </VStack>
             </HStack>
@@ -97,7 +97,7 @@ export default function Post({ id, time, author, text }) {
                                         {/* Comments will be displayed here */}
                                         <Text color="gray.500">No comments yet...</Text>
                                         <HStack align="stretch" spacing={2} mt={4}>
-                                            <Input placeholder="Write a comment..." borderRadius="xl" onChange={e => setCommentText(e.target.value)}/>
+                                            <Input placeholder="Write a comment..." borderRadius="xl" onChange={e => setCommentText(e.target.value)} />
                                             <Button
                                                 bg="purple.500"
                                                 color="white"

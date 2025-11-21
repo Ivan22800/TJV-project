@@ -1,25 +1,35 @@
 import { Box, Text, VStack } from "@chakra-ui/react"
 import { Avatar, HStack } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import MyPosts from "./MyPosts";
 
 export default function FeedMyPosts() {
-    const posts = [
-        {
-            id: "1",
-            time: Date.now() - 1000000,
-            text: "This is my first post!"
-        },
-        {
-            id: "2",
-            time: Date.now() - 500000,
-            text: "Loving this new social media app."
-        },
-        {
-            id: "3",
-            time: Date.now() - 200000,
-            text: "Anyone up for a virtual hangout?"
+    const [posts, setPosts] = useState([]);
+    const [userName, setUserName] = useState("User");
+    const token = localStorage.getItem('token'); 
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            const response = await fetch('http://localhost:8080/post/my', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch posts');
+            }
+            const data = await response.json();
+            setPosts(data);
+
+            if (data.length > 0 && data[0].author) {
+            const author = data[0].author;
+            setUserName(author.firstName || author.username || "User");
         }
-    ];
+        };
+        fetchPosts();
+    }, []);
 
     return (
         <>
@@ -41,7 +51,7 @@ export default function FeedMyPosts() {
                             <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
                         </Avatar.Root>
                         <VStack align="start" spacing={0} flex="1">
-                            <Text fontSize="l">John Pork</Text>
+                            <Text fontSize="l" fontWeight="bold">{userName}</Text>
                             <HStack spacing={2}>
                                 <Text fontSize="m">Posts: 10</Text>
                                 <Text fontSize="m">Followers: 100</Text>
