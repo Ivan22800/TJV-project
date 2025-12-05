@@ -63,7 +63,7 @@ export default function FeedMyPosts() {
             </Box>
             <VStack align="stretch" spacing={4} my="4">
                 {posts.map(post => (
-                    <MyPosts key={post.id} id={post.id} time={post.time} text={post.text} />
+                    <MyPosts key={post.id} id={post.id} time={post.time} text={post.text} likesCount={post.likesCount} likedByMe={post.likedByMe}/>
                 ))}
             </VStack>
         </>

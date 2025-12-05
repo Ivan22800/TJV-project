@@ -8,18 +8,6 @@ export default function Feed() {
     const [postText, setPostText] = useState("");
     const token = localStorage.getItem('token');
 
-    const addNewPost = () => {
-        if (!postText.trim()) return;
-        const newPost = {
-            id: crypto.randomUUID(),
-            time: Date.now(),
-            author: "John Pork",
-            text: postText
-        };
-        setPosts([newPost, ...posts]);
-        setPostText("");
-    };
-
     const newPost = async () => {
         if (!postText.trim()) return;
         try {
@@ -97,7 +85,6 @@ export default function Feed() {
                         borderRadius="xl"
                         alignSelf="flex-end"
                         _hover={{ bg: "purple.600" }}
-                        // onClick={addNewPost}
                         onClick={newPost}
                     >
                         Publish
@@ -107,7 +94,7 @@ export default function Feed() {
             </Box>
             <VStack align="stretch" spacing={4} my="4">
                 {posts.map(post => (
-                    <Post key={post.id} id={post.id} time={post.time} author={post.author} text={post.text} />
+                    <Post key={post.id} id={post.id} time={post.time} author={post.author} text={post.text} likesCount={post.likesCount} likedByMe={post.likedByMe}/>
                 ))}
             </VStack>
         </>

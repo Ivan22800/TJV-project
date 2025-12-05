@@ -6,9 +6,10 @@ import { BiCommentDetail } from "react-icons/bi";
 
 
 
-export default function Post({ id, time, text }) {
-    const [likes, setLikes] = useState(0);
-    const [liked, setLiked] = useState(false);
+export default function Post({ id, time, text, likesCount, likedByMe }) {
+    const [likes, setLikes] = useState(likesCount || 0);
+    const [liked, setLiked] = useState(likedByMe || false);
+    const token = localStorage.getItem('token');
 
     function formatTime(timestamp) {
         const diff = Date.now() - timestamp;
@@ -23,14 +24,29 @@ export default function Post({ id, time, text }) {
         return `${days}d ago`;
     }
 
-    function handleLike() {
-        if (liked) {
-            setLikes(likes - 1);
-        } else {
-            setLikes(likes + 1);
+    const handleLike = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/post/${id}/like`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to toggle like');
+            }
+
+            const isLiked = await response.json();
+
+            setLiked(isLiked);
+            setLikes(isLiked ? likes + 1 : likes - 1);
+
+        } catch (error) {
+            console.error('Like error:', error);
         }
-        setLiked(!liked);
-    }
+    };
+
     return (
         <Box
             flex="1"
@@ -57,7 +73,7 @@ export default function Post({ id, time, text }) {
             <HStack spacing={8} mt={2}>
                 <HStack spacing={2} cursor="pointer" onClick={handleLike}>
                     {liked ? (
-                        <AiFillHeart color="#ed4956" size={22} />
+                        <AiFillHeart color="#f472b6" size={22} />
                     ) : (
                         <AiOutlineHeart color="gray" size={22} />
                     )}

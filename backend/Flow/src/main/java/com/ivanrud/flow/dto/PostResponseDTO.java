@@ -11,4 +11,5 @@ public class PostResponseDTO {
     private int likes;
     private String authorUsername;
     private Long authorId;
+    private boolean likedByMe;
 }

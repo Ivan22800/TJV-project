@@ -5,11 +5,12 @@ import { BiCommentDetail } from "react-icons/bi";
 
 
 
-export default function Post({ id, time, author, text }) {
-    const [likes, setLikes] = useState(0);
-    const [liked, setLiked] = useState(false);
+export default function Post({ id, time, author, text, likesCount, likedByMe }) {
+    const [likes, setLikes] = useState(likesCount || 0);
+    const [liked, setLiked] = useState(likedByMe || false);
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState("");
+    const token = localStorage.getItem('token');
 
     function formatTime(timestamp) {
         const diff = Date.now() - timestamp;
@@ -24,14 +25,28 @@ export default function Post({ id, time, author, text }) {
         return `${days}d ago`;
     }
 
-    function handleLike() {
-        if (liked) {
-            setLikes(likes - 1);
-        } else {
-            setLikes(likes + 1);
+    const handleLike = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/post/${id}/like`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to toggle like');
+            }
+
+            const isLiked = await response.json();
+
+            setLiked(isLiked);
+            setLikes(isLiked ? likes + 1 : likes - 1);
+
+        } catch (error) {
+            console.error('Like error:', error);
         }
-        setLiked(!liked);
-    }
+    };
 
     const addNewComment = () => {
         if (!commentText.trim()) return;

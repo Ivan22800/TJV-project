@@ -16,10 +16,14 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final PostLikeService postLikeService;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository,
+            UserRepository userRepository,
+            PostLikeService postLikeService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.postLikeService = postLikeService;
     }
 
     public Post createPost(String username, String content) {
@@ -43,5 +47,25 @@ public class PostService {
 
     public List<Post> getPostsByUsername(String username) {
         return postRepository.findByAuthor_UsernameOrderByTimeDesc(username);
+    }
+
+    /**
+     * Получить посты с информацией о лайках текущего пользователя
+     */
+    public List<Post> getPostsByUsernameWithLikes(String username, String currentUsername) {
+        // Получаем текущего пользователя
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Получаем посты
+        List<Post> posts = postRepository.findByAuthor_UsernameOrderByTimeDesc(username);
+
+        // Для каждого поста проверяем, лайкнул ли его текущий пользователь
+        for (Post post : posts) {
+            boolean liked = postLikeService.isPostLikedByUser(currentUser.getId(), post.getId());
+            post.setLikedByMe(liked);
+        }
+
+        return posts;
     }
 }

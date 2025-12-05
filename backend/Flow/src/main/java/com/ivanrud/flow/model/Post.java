@@ -10,28 +10,29 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Setter
+@Getter
 @Entity
 @Table(name = "posts")
 public class Post {
 
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
     @Size(max = 1000, min = 1)
     @JsonProperty("text")
     @NotBlank(message = "Post cannot be empty")
     private String postContent;
 
-    @Getter
     private int likes;
 
-    @Getter
     private Long time;
 
-    @Getter
+    private Long likesCount = 0L;
+
+    @Transient
+    private Boolean likedByMe = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnoreProperties({ "posts", "hibernateLazyInitializer", "handler" })
