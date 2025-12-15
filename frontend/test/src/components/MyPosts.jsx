@@ -6,7 +6,7 @@ import { BiCommentDetail } from "react-icons/bi";
 
 
 
-export default function Post({ id, time, text, likesCount, likedByMe }) {
+export default function Post({ id, time, author, text, likesCount, likedByMe }) {
     const [likes, setLikes] = useState(likesCount || 0);
     const [liked, setLiked] = useState(likedByMe || false);
     const token = localStorage.getItem('token');
@@ -61,8 +61,8 @@ export default function Post({ id, time, text, likesCount, likedByMe }) {
         >
             <HStack align="start" spacing={4}>
                 <Avatar.Root boxSize="40px">
-                    <Avatar.Fallback name="Segun Adebayo" />
-                    <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
+                    <Avatar.Fallback name={author ? `${author.firstName} ${author.lastName}` : "Unknown"} />
+                    <Avatar.Image src={author?.avatarUrl ? `http://localhost:8080${author.avatarUrl}` : "https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png"} />
                 </Avatar.Root>
                 <VStack align="start" spacing={0} flex="1">
                     <Text fontSize="xs" color="gray.500">{formatTime(time)}</Text>

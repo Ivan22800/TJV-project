@@ -84,12 +84,12 @@ export default function Register() {
 
                     <Box>
                         <label htmlFor="name">Name</label>
-                        <Input id="name" name="name" focusBorderColor="teal.400" borderRadius="xl" />
+                        <Input id="name" name="name" colorPalette="purple" borderRadius="xl" />
                     </Box>
 
                     <Box>
                         <label htmlFor="surname">Surname</label>
-                        <Input id="surname" name="surname" focusBorderColor="teal.400" borderRadius="xl" />
+                        <Input id="surname" name="surname" colorPalette="purple" borderRadius="xl" />
                     </Box>
 
                     <Box>
@@ -98,14 +98,14 @@ export default function Register() {
                             id="email"
                             name="email"
                             type="email"
-                            focusBorderColor="teal.400"
+                            colorPalette="purple"
                             borderRadius="xl"
                         />
                     </Box>
 
                     <Box>
                         <label htmlFor="username">Username</label>
-                        <Input id="username" name="username" focusBorderColor="teal.400" borderRadius="xl" />
+                        <Input id="username" name="username" colorPalette="purple" borderRadius="xl" />
                     </Box>
 
                     <Box>
@@ -114,7 +114,7 @@ export default function Register() {
                             id="password"
                             name="password"
                             type="password"
-                            focusBorderColor="teal.400"
+                            colorPalette="purple"
                             borderRadius="xl"
                         />
                     </Box>

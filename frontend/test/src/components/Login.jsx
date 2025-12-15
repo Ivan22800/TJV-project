@@ -7,9 +7,11 @@ import {
     Stack,
     HStack,
 } from "@chakra-ui/react"
+import { useUser } from '../context/UserContext';
 
 export default function Login() {
     const navigate = useNavigate()
+    const { login } = useUser();
 
     const handleLogin = async () => {
         const username = document.querySelector('input[name="username"]').value;
@@ -36,8 +38,7 @@ export default function Login() {
             })
             .then(token => {
                 console.log('Login successful, token:', token);
-                // Сохраняем токен в localStorage
-                localStorage.setItem('token', token);
+                login(token);
                 navigate('/feed');
             })
             .catch((error) => {
@@ -68,7 +69,7 @@ export default function Login() {
 
                     <Box>
                         <label htmlFor="username">Username</label>
-                        <Input id="username" name="username" focusBorderColor="teal.400" borderRadius="xl" />
+                        <Input id="username" name="username" colorPalette="purple" borderRadius="xl" />
                     </Box>
 
                     <Box>
@@ -77,7 +78,7 @@ export default function Login() {
                             id="password"
                             name="password"
                             type="password"
-                            focusBorderColor="teal.400"
+                            colorPalette="purple"
                             borderRadius="xl"
                         />
                     </Box>

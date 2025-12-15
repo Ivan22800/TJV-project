@@ -2,11 +2,14 @@ import { Box, Text, VStack } from "@chakra-ui/react"
 import { Textarea, Avatar, HStack, Button } from "@chakra-ui/react"
 import React, { useState, useEffect } from 'react';
 import Post from "./Post";
+import { useUser } from '../context/UserContext';
 
 export default function Feed() {
     const [posts, setPosts] = useState([]);
     const [postText, setPostText] = useState("");
     const token = localStorage.getItem('token');
+
+    const { user } = useUser();
 
     const newPost = async () => {
         if (!postText.trim()) return;
@@ -65,8 +68,8 @@ export default function Feed() {
                 <VStack align="stretch" spacing={4}>
                     <HStack align="start" spacing={4}>
                         <Avatar.Root boxSize="40px">
-                            <Avatar.Fallback name="Segun Adebayo" />
-                            <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
+                            <Avatar.Fallback name={user ? `${user.firstName} ${user.lastName}` : "User"} />
+                            <Avatar.Image src={user?.avatarUrl ? `http://localhost:8080${user.avatarUrl}` : "https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png"} />
                         </Avatar.Root>
                         <Textarea
                             resize="none"
@@ -94,7 +97,7 @@ export default function Feed() {
             </Box>
             <VStack align="stretch" spacing={4} my="4">
                 {posts.map(post => (
-                    <Post key={post.id} id={post.id} time={post.time} author={post.author} text={post.text} likesCount={post.likesCount} likedByMe={post.likedByMe}/>
+                    <Post key={post.id} id={post.id} time={post.time} author={post.author} text={post.text} likesCount={post.likesCount} likedByMe={post.likedByMe} />
                 ))}
             </VStack>
         </>

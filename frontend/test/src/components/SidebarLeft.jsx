@@ -2,12 +2,13 @@ import { Box, Button, VStack } from "@chakra-ui/react"
 import { MdRssFeed, MdOutlineGroup } from "react-icons/md";
 import { Link, useLocation } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
-
+import { LiaUserFriendsSolid } from "react-icons/lia";
 
 const menuItems = [
     { path: "/feed", label: "Feed", icon: <MdRssFeed /> },
     { path: "/feed/groups", label: "My Groups", icon: <MdOutlineGroup /> },
-    { path: "/feed/my-posts", label: "My Profile", icon: <CgProfile /> },
+    { path: "/feed/subscriptions", label: "Subscriptions", icon: <LiaUserFriendsSolid /> },
+    { path: "/feed/my-posts", label: "My Profile", icon: <CgProfile /> }
 ];
 
 export default function SidebarLeft() {

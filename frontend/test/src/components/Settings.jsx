@@ -1,8 +1,12 @@
 import { Box, Text, VStack, HStack, Heading, Button, Container, Avatar, Field, Input, Group, Switch, Checkbox } from "@chakra-ui/react"
-import { Select } from "@chakra-ui/react"
 import { useNavigate } from "react-router-dom";
 import { PasswordInput } from "../components/ui/password-input"
 import { useState, useEffect } from "react";
+import { useRef } from "react";
+import { useUser } from '../context/UserContext';
+import { Tabs } from "@chakra-ui/react"
+import { Dialog, CloseButton, Portal } from "@chakra-ui/react"
+import { toaster } from "@/components/ui/toaster"
 
 function SettingSwitch({ title, description }) {
     return (
@@ -40,66 +44,145 @@ function CheckBox({ text }) {
 
 export default function Settings() {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const fileInputRef = useRef(null);
+    const { user, updateUser } = useUser();
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         username: '',
-        email: ''
+        email: '',
+        avatar: ''
     });
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: '',
+        newPassword: ''
+    });
+    const [isDialogOpen, setDialogOpen] = useState(false)
+    const [isPasswordDialogOpen, setPasswordDialogOpen] = useState(false)
 
     useEffect(() => {
-        // Загружаем данные пользователя при монтировании компонента
-        const fetchUserData = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    navigate('/');
-                    return;
-                }
-
-                const response = await fetch('http://localhost:8080/api/auth/me', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        // Токен невалидный, перенаправляем на регистрацию
-                        localStorage.removeItem('token');
-                        navigate('/');
-                        return;
-                    }
-                    throw new Error('Failed to fetch user data');
-                }
-
-                const userData = await response.json();
-                setUser(userData);
-                setFormData({
-                    firstName: userData.firstName || '',
-                    lastName: userData.lastName || '',
-                    username: userData.username || '',
-                    email: userData.email || ''
-                });
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUserData();
-    }, [navigate]);
+        if (user) {
+            setFormData({
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                username: user.username || '',
+                email: user.email || ''
+            });
+            setLoading(false);
+        }
+    }, [user]);
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
+    };
+
+    const handlePasswordChange = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/auth/${user.username}/change-password`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(passwordData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update password');
+            }
+
+            toaster.create({
+                description: "Password updated successfully",
+                type: "success",
+            })
+            setPasswordData({ oldPassword: '', newPassword: '' });
+            setPasswordDialogOpen(false);
+        } catch (error) {
+            console.error('Error updating password:', error);
+            toaster.create({
+                description: "Failed to update password",
+                type: "error",
+            })
+        }
+    };
+
+    const handleProfileUpdate = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/auth/${user.username}/update-profile`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to update profile');
+            }
+
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+            }
+
+            toaster.create({
+                description: "Profile updated successfully",
+                type: "success",
+            })
+            updateUser(formData);
+            setDialogOpen(false);
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            toaster.create({
+                description: "Failed to update profile",
+                type: "error",
+            })
+        }
+    };
+
+    const handleAvatarChange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const uploadData = new FormData();
+        uploadData.append('file', file);
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/auth/${user.username}/upload-avatar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: uploadData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to upload avatar');
+            }
+
+            const avatarUrl = await response.text();
+            updateUser({ avatarUrl });
+            toaster.create({
+                description: "Avatar uploaded successfully",
+                type: "success",
+            })
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            toaster.create({
+                description: "Failed to upload avatar",
+                type: "error",
+            })
+        }
     };
 
     if (loading) {
@@ -133,124 +216,287 @@ export default function Settings() {
                     boxShadow="md"
                 >
                     <VStack align="stretch" spacing={4}>
-                        <Heading size="lg" mb={4}>Profile Settings</Heading>
-                        <HStack spacing={4}>
-                            <Avatar.Root boxSize="120px">
-                                <Avatar.Fallback name="Segun Adebayo" />
-                                <Avatar.Image src="https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png" />
-                            </Avatar.Root>
-                            <VStack align="start" spacing={0} flex="1" ml={6}>
-                                <Button
-                                    colorScheme="purple"
-                                    variant="outline"
-                                    bg="purple.400"
-                                    color="white"
-                                    _hover={{ bg: "purple.500" }}
-                                    borderRadius="xl"
-                                >
-                                    Change Avatar</Button>
-                                <Text fontSize="xs" color="gray.600">JPJ or PNG, 1MB max.</Text>
-                            </VStack>
-                        </HStack>
-                        <HStack spacing={4} align="center" mt={4}>
-                            <Group gap="10" width="full">
-                                <Field.Root required>
-                                    <Field.Label>
-                                        First Name
-                                    </Field.Label>
-                                    <Input
-                                        placeholder="John"
-                                        variant="subtle"
-                                        value={formData.firstName}
-                                        onChange={(e) => handleInputChange('firstName', e.target.value)}
-                                    />
-                                </Field.Root>
-                                <Field.Root required>
-                                    <Field.Label>
-                                        Last Name
-                                    </Field.Label>
-                                    <Input
-                                        placeholder="Pork"
-                                        variant="subtle"
-                                        value={formData.lastName}
-                                        onChange={(e) => handleInputChange('lastName', e.target.value)}
-                                    />
-                                </Field.Root>
-                            </Group>
-                        </HStack>
-                        <HStack spacing={4} align="center" mt={4}>
-                            <Group gap="10" width="full">
-                                <Field.Root required>
-                                    <Field.Label>
-                                        Username
-                                    </Field.Label>
-                                    <Input
-                                        placeholder="johnpork"
-                                        variant="subtle"
-                                        value={formData.username}
-                                        onChange={(e) => handleInputChange('username', e.target.value)}
-                                    />
-                                </Field.Root>
-                                <Field.Root required>
-                                    <Field.Label>
-                                        Email
-                                    </Field.Label>
-                                    <Input
-                                        placeholder="me@example.com"
-                                        variant="subtle"
-                                        value={formData.email}
-                                        onChange={(e) => handleInputChange('email', e.target.value)}
-                                    />
-                                </Field.Root>
-                            </Group>
-                        </HStack>
-                        <Group gap="10" width="full" mt={4}>
-                            <Field.Root required>
-                                <Field.Label>
-                                    Password
-                                </Field.Label>
-                                <PasswordInput size="md" />
-                            </Field.Root>
+                        <HStack spacing={4} mb={4} align="center">
                             <Button
-                                colorScheme="purple"
-                                variant="outline"
-                                bg="purple.400"
-                                color="white"
-                                _hover={{ bg: "purple.500" }}
+                                variant="ghost"
                                 borderRadius="xl"
-                                mt={8}
+                                onClick={() => navigate('/feed')}
+                                size="sm"
                             >
-                                Change Password
+                                ←
                             </Button>
-                        </Group>
-                        <Heading size="lg" mb={4} mt={12}>Privacy Settings</Heading>
-                        <SettingSwitch
-                            title="Show Email"
-                            description="Your email will be visible to other users"
-                        />
-                        <SettingSwitch
-                            title="Allow Friend Requests"
-                            description="Other users can send you friend requests"
-                        />
-                        <SettingSwitch
-                            title="Make Profile Private"
-                            description="Only friends can see your profile and posts"
-                        />
-                        <Heading size="lg" mb={4} mt={12}>Notification</Heading>
-                        <CheckBox text="Email Notifications" />
-                        <CheckBox text="SMS Notifications" />
-                        <CheckBox text="Push Notifications" />
+                            <Heading size="lg">Profile Settings</Heading>
+                        </HStack>
+                        <Tabs.Root defaultValue="profile" variant="line">
+                            <Tabs.List>
+                                <Tabs.Trigger value="profile">Profile</Tabs.Trigger>
+                                <Tabs.Trigger value="privacy">Privacy</Tabs.Trigger>
+                                <Tabs.Trigger value="notifications">Notifications</Tabs.Trigger>
+                            </Tabs.List>
+                            <Tabs.Content value="profile">
+                                <HStack spacing={4}>
+                                    <Avatar.Root boxSize="120px">
+                                        <Avatar.Fallback name={user ? `${user.firstName} ${user.lastName}` : "User"} />
+                                        <Avatar.Image src={user?.avatarUrl ? `http://localhost:8080${user.avatarUrl}` : "https://www.nationalflags.shop/WebRoot/vilkasfi01/Shops/2014080403/66F5/457A/B8F1/BB43/EC8A/7F00/0001/CBF5/John_pork_flag_oikee_ml.png"} />
+                                    </Avatar.Root>
+                                    <VStack align="start" spacing={0} flex="1" ml={6}>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            style={{ display: 'none' }}
+                                            accept="image/*"
+                                            onChange={handleAvatarChange}
+                                        />
+                                        <Button
+                                            colorScheme="purple"
+                                            variant="outline"
+                                            bg="purple.400"
+                                            color="white"
+                                            _hover={{ bg: "purple.500" }}
+                                            borderRadius="xl"
+                                            width="170px"
+                                            onClick={() => fileInputRef.current.click()}
+                                        >
+                                            Change Avatar</Button>
+                                        <Text fontSize="xs" color="gray.600">JPJ or PNG, 10MB max.</Text>
+                                    </VStack>
+                                </HStack>
+                                <HStack spacing={4} align="center" mt={4}>
+                                    <Group gap="10" width="full">
+                                        <Field.Root required>
+                                            <Field.Label>
+                                                First Name
+                                            </Field.Label>
+                                            <Input
+                                                borderRadius="xl"
+                                                placeholder="John"
+                                                variant="subtle"
+                                                value={formData.firstName}
+                                                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                                            />
+                                        </Field.Root>
+                                        <Field.Root required>
+                                            <Field.Label>
+                                                Last Name
+                                            </Field.Label>
+                                            <Input
+                                                borderRadius="xl"
+                                                placeholder="Pork"
+                                                variant="subtle"
+                                                value={formData.lastName}
+                                                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                                            />
+                                        </Field.Root>
+                                    </Group>
 
-                        <Button
-                            colorScheme="purple"
-                            variant="outline"
-                            borderRadius="xl"
-                            onClick={() => navigate('/feed')}
-                            alignSelf="flex-start"
-                            mt={4}
-                        >
-                            ← Back to Feed
-                        </Button>
+                                </HStack>
+                                <HStack spacing={4} align="center" mt={4}>
+                                    <Group gap="10" width="full">
+                                        <Field.Root required>
+                                            <Field.Label>
+                                                Username
+                                            </Field.Label>
+                                            <Input
+                                                borderRadius="xl"
+                                                placeholder="johnpork"
+                                                variant="subtle"
+                                                value={formData.username}
+                                                onChange={(e) => handleInputChange('username', e.target.value)}
+                                            />
+                                        </Field.Root>
+                                        <Field.Root required>
+                                            <Field.Label>
+                                                Email
+                                            </Field.Label>
+                                            <Input
+                                                borderRadius="xl"
+                                                placeholder="me@example.com"
+                                                variant="subtle"
+                                                value={formData.email}
+                                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                            />
+                                        </Field.Root>
+                                    </Group>
+                                </HStack>
+                                <Dialog.Root placement="center" open={isDialogOpen} onOpenChange={(e) => setDialogOpen(e.open)}>
+                                    <Dialog.Trigger asChild>
+                                        <Box display="flex" justifyContent="flex-end">
+                                            <Button
+                                                colorScheme="green"
+                                                bg="green.400"
+                                                color="white"
+                                                _hover={{ bg: "green.500" }}
+                                                borderRadius="xl"
+                                                mt={4}
+                                                width="170px"
+                                            >
+                                                Save Profile Changes
+                                            </Button>
+                                        </Box>
+                                    </Dialog.Trigger>
+                                    <Portal>
+                                        <Dialog.Backdrop />
+                                        <Dialog.Positioner>
+                                            <Dialog.Content borderRadius="xl">
+                                                <Dialog.Header>
+                                                    <Dialog.Title>Are you sure you want to save changes?</Dialog.Title>
+                                                </Dialog.Header>
+                                                <Dialog.Footer>
+                                                    <Dialog.ActionTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            colorScheme="red"
+                                                            bg="red.400"
+                                                            color="white"
+                                                            _hover={{ bg: "red.500" }}
+                                                            borderRadius="xl"
+                                                            mt={4}
+                                                        >Cancel</Button>
+                                                    </Dialog.ActionTrigger>
+                                                    <Button
+                                                        onClick={handleProfileUpdate}
+                                                        colorScheme="purple"
+                                                        bg="purple.400"
+                                                        color="white"
+                                                        _hover={{ bg: "purple.500" }}
+                                                        borderRadius="xl"
+                                                        mt={4}
+                                                    >Save</Button>
+                                                </Dialog.Footer>
+                                                <Dialog.CloseTrigger asChild>
+                                                    <CloseButton size="sm" />
+                                                </Dialog.CloseTrigger>
+                                            </Dialog.Content>
+                                        </Dialog.Positioner>
+                                    </Portal>
+                                </Dialog.Root>
+                                <Group gap="10" width="full" mt={4}>
+                                    <Field.Root required>
+                                        <Field.Label>
+                                            Old Password
+                                        </Field.Label>
+                                        <PasswordInput
+                                            borderRadius="xl"
+                                            size="md"
+                                            value={passwordData.oldPassword}
+                                            onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))}
+                                        />
+                                    </Field.Root>
+                                    <Field.Root required>
+                                        <Field.Label>
+                                            New Password
+                                        </Field.Label>
+                                        <PasswordInput
+                                            borderRadius="xl"
+                                            size="md"
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                                        />
+                                    </Field.Root>
+                                </Group>
+                                <Dialog.Root placement="center" open={isPasswordDialogOpen} onOpenChange={(e) => setPasswordDialogOpen(e.open)}>
+                                    <Dialog.Trigger asChild>
+                                        <Box display="flex" justifyContent="flex-end">
+                                            <Button
+                                                colorScheme="purple"
+                                                variant="outline"
+                                                bg="purple.400"
+                                                color="white"
+                                                _hover={{ bg: "purple.500" }}
+                                                borderRadius="xl"
+                                                width="170px"
+                                                mt={4}
+                                            >
+                                                Change Password
+                                            </Button>
+                                        </Box>
+                                    </Dialog.Trigger>
+                                    <Portal>
+                                        <Dialog.Backdrop />
+                                        <Dialog.Positioner>
+                                            <Dialog.Content borderRadius="xl">
+                                                <Dialog.Header>
+                                                    <Dialog.Title>Change Password?</Dialog.Title>
+                                                </Dialog.Header>
+                                                <Dialog.Footer>
+                                                    <Dialog.ActionTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            colorScheme="red"
+                                                            bg="red.400"
+                                                            color="white"
+                                                            _hover={{ bg: "red.500" }}
+                                                            borderRadius="xl"
+                                                            mt={4}>Cancel</Button>
+                                                    </Dialog.ActionTrigger>
+                                                    <Button
+                                                        onClick={handlePasswordChange}
+                                                        colorScheme="purple"
+                                                        bg="purple.400"
+                                                        color="white"
+                                                        _hover={{ bg: "purple.500" }}
+                                                        borderRadius="xl"
+                                                        mt={4}
+                                                    >Save</Button>
+                                                </Dialog.Footer>
+                                                <Dialog.CloseTrigger asChild>
+                                                    <CloseButton size="sm" />
+                                                </Dialog.CloseTrigger>
+                                            </Dialog.Content>
+                                        </Dialog.Positioner>
+                                    </Portal>
+                                </Dialog.Root>
+                            </Tabs.Content>
+
+                            <Tabs.Content value="privacy">
+                                <SettingSwitch
+                                    title="Show Email"
+                                    description="Your email will be visible to other users"
+                                />
+                                <SettingSwitch
+                                    title="Allow Friend Requests"
+                                    description="Other users can send you friend requests"
+                                />
+                                <SettingSwitch
+                                    title="Make Profile Private"
+                                    description="Only friends can see your profile and posts"
+                                />
+                                <Box display="flex" justifyContent="flex-end">
+                                    <Button
+                                        colorScheme="green"
+                                        variant="outline"
+                                        bg="green.400"
+                                        color="white"
+                                        _hover={{ bg: "green.500" }}
+                                        borderRadius="xl"
+                                        width="170px"
+                                        mt={4}
+                                    >
+                                        Save
+                                    </Button>
+                                </Box>
+
+                            </Tabs.Content>
+                            <Tabs.Content value="notifications">
+                                <CheckBox text="Email Notifications" />
+                                <CheckBox text="SMS Notifications" />
+                                <CheckBox text="Push Notifications" />
+                                <Box display="flex" justifyContent="flex-end">
+                                    <Button
+                                        colorScheme="green"
+                                        variant="outline"
+                                        bg="green.400"
+                                        color="white"
+                                        _hover={{ bg: "green.500" }}
+                                        borderRadius="xl"
+                                        width="170px"
+                                        mt={4}
+                                    >
+                                        Save
+                                    </Button>
+                                </Box>
+                            </Tabs.Content>
+                        </Tabs.Root>
                     </VStack>
                 </Box>
             </Container >

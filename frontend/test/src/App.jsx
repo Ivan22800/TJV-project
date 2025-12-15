@@ -7,39 +7,46 @@ import FeedMyPosts from './components/FeedMyPosts';
 import Register from './components/Register';
 import Login from './components/Login';
 import ProtectedRoute, { PublicRoute } from './components/ProtectedRoute';
+import { UserProvider } from './context/UserContext';
+import { Toaster } from './components/ui/toaster';
+import Subscriptions from './components/Subscriptions';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        } />
-        <Route path="/login" element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        } />
-        <Route path="/feed/*" element={
-          <ProtectedRoute>
-            <Layout>
-              <Routes>
-                <Route index element={<Feed />} />
-                <Route path="groups" element={<Groups />} />
-                <Route path="my-posts" element={<FeedMyPosts />} />
-              </Routes>
-            </Layout>
-          </ProtectedRoute>
-        } />
-      </Routes>
-    </BrowserRouter>
+    <UserProvider>
+      <Toaster />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } />
+          <Route path="/login" element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
+          <Route path="/feed/*" element={
+            <ProtectedRoute>
+              <Layout>
+                <Routes>
+                  <Route index element={<Feed />} />
+                  <Route path="groups" element={<Groups />} />
+                  <Route path="my-posts" element={<FeedMyPosts />} />
+                  <Route path="subscriptions" element={<Subscriptions />} />
+                </Routes>
+              </Layout>
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
   )
 }
 
