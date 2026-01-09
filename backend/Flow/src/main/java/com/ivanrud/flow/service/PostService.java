@@ -49,23 +49,21 @@ public class PostService {
         return postRepository.findByAuthor_UsernameOrderByTimeDesc(username);
     }
 
-    /**
-     * Получить посты с информацией о лайках текущего пользователя
-     */
     public List<Post> getPostsByUsernameWithLikes(String username, String currentUsername) {
-        // Получаем текущего пользователя
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Получаем посты
         List<Post> posts = postRepository.findByAuthor_UsernameOrderByTimeDesc(username);
 
-        // Для каждого поста проверяем, лайкнул ли его текущий пользователь
         for (Post post : posts) {
             boolean liked = postLikeService.isPostLikedByUser(currentUser.getId(), post.getId());
             post.setLikedByMe(liked);
         }
 
         return posts;
+    }
+
+    public long getCountPostsByUsername(String username) {
+        return postRepository.countByAuthor_Username(username);
     }
 }

@@ -2,14 +2,22 @@ package com.ivanrud.flow.service;
 
 import com.ivanrud.flow.model.User;
 import com.ivanrud.flow.repository.UserRepository;
-import com.ivanrud.flow.dto.LoginUserDTO;
-import com.ivanrud.flow.dto.UserResponse;
+import com.ivanrud.flow.dto.LoginUserDto;
+import com.ivanrud.flow.dto.UserResponseDto;
 
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -65,7 +73,7 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
-    public UserResponse loginUser(LoginUserDTO loginUserDTO) {
+    public UserResponseDto loginUser(LoginUserDto loginUserDTO) {
         User user = userRepository.findByUsername(loginUserDTO.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -73,12 +81,99 @@ public class UserService {
             throw new RuntimeException("Invalid password");
         }
 
-        return new UserResponse(
+        return new UserResponseDto(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getFirstName(),
-                user.getLastName());
+                user.getLastName(),
+                user.getAvatarUrl());
+    }
+
+    public void changeUsername(String currentUsername, String newUsername) {
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (userRepository.existsByUsername(newUsername)) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+
+        user.setUsername(newUsername);
+        userRepository.save(user);
+    }
+
+    public void changePassword(String currentUsername, String oldPassword, String newPassword) {
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Incorrect old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public User updateProfile(String currentUsername, String firstName, String lastName, String newUsername,
+            String newEmail) {
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (newUsername != null && !newUsername.isBlank() && !newUsername.equals(currentUsername)) {
+            if (userRepository.existsByUsername(newUsername)) {
+                throw new IllegalArgumentException("Username already taken");
+            }
+            user.setUsername(newUsername);
+        }
+
+        if (newEmail != null && !newEmail.isBlank() && !newEmail.equals(user.getEmail())) {
+            if (userRepository.existsByEmail(newEmail)) {
+                throw new IllegalArgumentException("Email already registered");
+            }
+            user.setEmail(newEmail);
+        }
+
+        if (firstName != null)
+            user.setFirstName(firstName);
+        if (lastName != null)
+            user.setLastName(lastName);
+
+        return userRepository.save(user);
+    }
+
+    public String uploadAvatar(String username, MultipartFile file) throws IOException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Path uploadPath = Paths.get("uploads/avatars");
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(filename);
+
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        String avatarUrl = "/uploads/avatars/" + filename;
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+
+        return avatarUrl;
+    }
+
+    public List<UserResponseDto> searchUsers(String query) {
+        List<User> users = userRepository.searchUsers(query);
+
+        return users.stream()
+                .map(u -> new UserResponseDto(
+                        u.getId(),
+                        u.getUsername(),
+                        u.getEmail(),
+                        u.getFirstName(),
+                        u.getLastName(),
+                        u.getAvatarUrl()
+                )).toList();
     }
 
     private void validateUser(User user) {
@@ -92,20 +187,22 @@ public class UserService {
             throw new IllegalArgumentException("Password must be at least 6 characters");
         }
     }
-    
-    public UserResponse getUserById(Long id) {
+
+    public UserResponseDto getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        return new UserResponse(
+        return new UserResponseDto(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getFirstName(),
-                user.getLastName());
+                user.getLastName(),
+                user.getAvatarUrl());
     }
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
 }

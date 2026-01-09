@@ -3,9 +3,9 @@ package com.ivanrud.flow.controller;
 import com.ivanrud.flow.model.User;
 import com.ivanrud.flow.repository.UserRepository;
 import com.ivanrud.flow.security.JwtUtil;
-import com.ivanrud.flow.dto.RegisterRequest;
-import com.ivanrud.flow.dto.LoginUserDTO;
-import com.ivanrud.flow.dto.UserResponse;
+import com.ivanrud.flow.dto.RegisterRequestDto;
+import com.ivanrud.flow.dto.LoginUserDto;
+import com.ivanrud.flow.dto.UserResponseDto;
 import com.ivanrud.flow.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class AuthController {
     UserService userService;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginUserDTO loginUserDTO) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginUserDto loginUserDTO) {
         try {
             System.out.println("Attempting to authenticate user: " + loginUserDTO.getUsername());
 
@@ -71,7 +71,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequestDto registerRequest) {
         try {
             if (userRepository.existsByUsername(registerRequest.getUsername())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -128,12 +128,13 @@ public class AuthController {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-            UserResponse userResponse = new UserResponse(
+            UserResponseDto userResponse = new UserResponseDto(
                     user.getId(),
                     user.getUsername(),
                     user.getEmail(),
                     user.getFirstName(),
-                    user.getLastName());
+                    user.getLastName(),
+                    user.getAvatarUrl());
 
             return ResponseEntity.ok(userResponse);
         } catch (Exception e) {

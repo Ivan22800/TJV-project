@@ -12,16 +12,15 @@ import java.util.Objects;
 import java.util.Set;
 
 @Setter
+@Getter
 @Entity
 @Table(name = "users")
 public class User {
 
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
     @NotBlank(message = "Username cannot be empty")
     @Column(unique = true, nullable = false)
     private String username;
@@ -30,23 +29,28 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Getter
     @NotBlank(message = "Email cannot be empty")
     @Email(message = "Invalid email format")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Getter
     @Column(name = "first_name")
     private String firstName;
 
-    @Getter
     @Column(name = "last_name")
     private String lastName;
 
-    @Getter
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Post> posts = new HashSet<>();
+
+    @OneToMany(mappedBy = "follower")
+    private Set<Subscription> following = new HashSet<>();
+
+    @OneToMany(mappedBy = "following")
+    private Set<Subscription> followers = new HashSet<>();
 
     public User() {
     }

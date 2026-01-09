@@ -7,6 +7,7 @@ import {
     Stack,
     HStack
 } from "@chakra-ui/react"
+import { toaster } from "@/components/ui/toaster"
 
 export default function Register() {
     const navigate = useNavigate()
@@ -37,7 +38,6 @@ export default function Register() {
                     const contentType = response.headers.get("content-type");
                     if (contentType && contentType.includes("application/json")) {
                         const errorData = await response.json();
-                        // Если ошибка валидации, показываем все ошибки
                         if (typeof errorData === 'object') {
                             errorMessage = Object.values(errorData).join(', ') || 'Registration failed';
                         } else {
@@ -48,16 +48,24 @@ export default function Register() {
                     }
                     throw new Error(errorMessage);
                 }
-                return await response.text(); // AuthController возвращает String, а не JSON
+                return await response.text();
             })
             .then(message => {
                 console.log('Success:', message);
-                alert('Registration successful!');
-                navigate('/feed');
+                toaster.create({
+                        title: 'Registration successful',
+                        description: 'You have successfully registered!',
+                        type: 'success',
+                    })
+                navigate('/login');
             })
             .catch((error) => {
                 console.error('Error:', error.message);
-                alert(error.message); // Показываем ошибку пользователю
+                toaster.create({
+                        title: 'Registration failed',
+                        description: error.message || 'Registration failed',
+                        type: 'error',
+                    })
             });
     }
 

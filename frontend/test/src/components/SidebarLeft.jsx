@@ -6,7 +6,7 @@ import { LiaUserFriendsSolid } from "react-icons/lia";
 
 const menuItems = [
     { path: "/feed", label: "Feed", icon: <MdRssFeed /> },
-    { path: "/feed/groups", label: "My Groups", icon: <MdOutlineGroup /> },
+    // { path: "/feed/groups", label: "My Groups", icon: <MdOutlineGroup /> },
     { path: "/feed/subscriptions", label: "Subscriptions", icon: <LiaUserFriendsSolid /> },
     { path: "/feed/my-posts", label: "My Profile", icon: <CgProfile /> }
 ];

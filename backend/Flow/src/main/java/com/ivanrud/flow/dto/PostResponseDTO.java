@@ -1,15 +1,21 @@
 package com.ivanrud.flow.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-public class PostResponseDTO {
+@Builder
+public class PostResponseDto {
     private Long id;
-    private String content;
-    private int likes;
-    private String authorUsername;
-    private Long authorId;
+    private String text;
+    private Long time;
+    private int likesCount;
     private boolean likedByMe;
+    private UserResponseDto author;
 }

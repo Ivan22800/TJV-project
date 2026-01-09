@@ -1,11 +1,13 @@
 package com.ivanrud.flow.controller;
 
+import com.ivanrud.flow.dto.PostResponseDto;
+import com.ivanrud.flow.dto.UserResponseDto;
 import com.ivanrud.flow.model.Post;
 import com.ivanrud.flow.model.User;
 import com.ivanrud.flow.service.PostService;
 import com.ivanrud.flow.service.PostLikeService;
 import com.ivanrud.flow.repository.UserRepository;
-import com.ivanrud.flow.dto.PostCreateDTO;
+import com.ivanrud.flow.dto.PostCreateDto;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -30,14 +32,31 @@ public class PostRestController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<Post> createPost(
-            @RequestBody PostCreateDTO dto,
+    public ResponseEntity<PostResponseDto> createPost(
+            @RequestBody PostCreateDto dto,
             Authentication authentication // JWT токен
     ) {
-
         String username = authentication.getName();
         Post post = postService.createPost(username, dto.getContent());
-        return ResponseEntity.ok(post);
+
+        User author = post.getAuthor();
+        UserResponseDto authorDto = new UserResponseDto(
+                author.getId(),
+                author.getUsername(),
+                author.getEmail(),
+                author.getFirstName(),
+                author.getLastName(),
+                author.getAvatarUrl());
+
+        PostResponseDto response = PostResponseDto.builder()
+                .id(post.getId())
+                .text(post.getPostContent())
+                .time(post.getTime())
+                .likesCount(post.getLikesCount() != null ? post.getLikesCount().intValue() : 0)
+                .author(authorDto)
+                .likedByMe(post.getLikedByMe() != null ? post.getLikedByMe() : false)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/like")
@@ -53,8 +72,36 @@ public class PostRestController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<Post>> getMyPosts(Authentication authentication) {
+    public ResponseEntity<List<PostResponseDto>> getMyPosts(Authentication authentication) {
         String username = authentication.getName();
-        return ResponseEntity.ok(postService.getPostsByUsernameWithLikes(username, username));
+        List<Post> posts = postService.getPostsByUsernameWithLikes(username, username);
+
+        List<PostResponseDto> responseList = posts.stream()
+                .map(post -> {
+                    User author = post.getAuthor();
+                    UserResponseDto authorDto = new UserResponseDto(
+                            author.getId(),
+                            author.getUsername(),
+                            author.getEmail(),
+                            author.getFirstName(),
+                            author.getLastName(),
+                            author.getAvatarUrl());
+
+                    return PostResponseDto.builder()
+                            .id(post.getId())
+                            .text(post.getPostContent())
+                            .time(post.getTime())
+                            .likesCount(post.getLikesCount() != null ? post.getLikesCount().intValue() : 0)
+                            .author(authorDto)
+                            .likedByMe(post.getLikedByMe() != null ? post.getLikedByMe() : false)
+                            .build();
+                })
+                .toList();
+        return ResponseEntity.ok(responseList);
+    }
+
+    @GetMapping("/count/{username}")
+    public long getUserPostCount(@PathVariable String username) {
+        return postService.getCountPostsByUsername(username);
     }
 }

@@ -12,4 +12,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByAuthor_IdOrderByTimeDesc(Long userId);
 
     List<Post> findByAuthor_UsernameOrderByTimeDesc(String username);
+
+    long countByAuthor_Username(String username);
 }

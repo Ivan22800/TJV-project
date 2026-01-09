@@ -8,6 +8,7 @@ import {
     HStack,
 } from "@chakra-ui/react"
 import { useUser } from '../context/UserContext';
+import { toaster } from "@/components/ui/toaster"
 
 export default function Login() {
     const navigate = useNavigate()
@@ -31,10 +32,9 @@ export default function Login() {
                 const responseText = await response.text();
                 if (!response.ok) {
                     console.error('Server error:', responseText);
-                    alert(responseText || 'Login failed');
                     throw new Error(responseText || 'Login failed');
                 }
-                return responseText; // AuthController возвращает String (токен), а не JSON
+                return responseText; 
             })
             .then(token => {
                 console.log('Login successful, token:', token);
@@ -43,6 +43,11 @@ export default function Login() {
             })
             .catch((error) => {
                 console.error('Login error:', error.message);
+                toaster.create({
+                        title: 'Login failed',
+                        description: error.message || 'Login failed',
+                        type: 'error',
+                    })
             });
     }
 
