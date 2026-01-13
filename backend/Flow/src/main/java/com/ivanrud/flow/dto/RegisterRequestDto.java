@@ -2,6 +2,7 @@ package com.ivanrud.flow.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class RegisterRequestDto {
 
     @NotBlank
     @Email
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}$", message = "Email contains invalid characters")
     @Size(max = 100)
     private String email;
 

@@ -1,12 +1,14 @@
 package com.ivanrud.flow.controller;
 
 import com.ivanrud.flow.dto.*;
+import com.ivanrud.flow.service.SubscriptionService;
 import com.ivanrud.flow.service.UserService;
 import com.ivanrud.flow.model.User;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,44 +19,18 @@ import com.ivanrud.flow.security.JwtUtil;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:5173")
 public class UserRestController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final SubscriptionService subscriptionService;
 
-    public UserRestController(UserService userService, JwtUtil jwtUtil) {
+    public UserRestController(UserService userService, JwtUtil jwtUtil, SubscriptionService subscriptionService) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> registerUser(@Valid @RequestBody RegisterRequestDto registerRequest) {
-        User user = new User(
-                registerRequest.getUsername(),
-                registerRequest.getPassword(),
-                registerRequest.getEmail(),
-                registerRequest.getFirstName(),
-                registerRequest.getLastName());
-
-        User registeredUser = userService.registerUser(user);
-
-        UserResponseDto userResponse = new UserResponseDto(
-                registeredUser.getId(),
-                registeredUser.getUsername(),
-                registeredUser.getEmail(),
-                registeredUser.getFirstName(),
-                registeredUser.getLastName(),
-                registeredUser.getAvatarUrl());
-
-        return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<UserResponseDto> loginUser(@RequestBody LoginUserDto loginUserDTO) {
-        UserResponseDto user = userService.loginUser(loginUserDTO);
-        return ResponseEntity.ok(user);
+        this.subscriptionService = subscriptionService;
     }
 
     @PatchMapping("/{username}/change-password")
@@ -66,7 +42,7 @@ public class UserRestController {
     }
 
     @PatchMapping("/{username}/update-profile")
-    public UpdateProfileDto updateProfile(@PathVariable String username, @RequestBody UpdateProfileDto dto) {
+    public UpdateProfileDto updateProfile(@PathVariable String username, @Valid @RequestBody UpdateProfileDto dto) {
         User updatedUser = userService.updateProfile(username, dto.getFirstName(), dto.getLastName(), dto.getUsername(),
                 dto.getEmail());
         String newToken = jwtUtil.generateToken(updatedUser.getUsername());
@@ -86,15 +62,55 @@ public class UserRestController {
         return ResponseEntity.ok(avatarUrl);
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         UserResponseDto userResponse = userService.getUserById(id);
         return ResponseEntity.ok(userResponse);
     }
 
-    @GetMapping("/users/search")
-    public ResponseEntity<List<UserResponseDto>> getUserByUsername(@RequestParam String query) {
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponseDto>> getUserByUsername(
+            @RequestParam String query,
+            Authentication authentication) {
+
+        if (query == null || query.isBlank()) {
+            return ResponseEntity.ok(List.of());
+        }
+
         List<UserResponseDto> userResponses = userService.searchUsers(query);
-        return ResponseEntity.ok(userResponses);
+        String currentUsername = authentication.getName();
+
+        List<UserResponseDto> filteredResults = userResponses.stream()
+                .filter(u -> !u.getUsername().equals(currentUsername))
+                .peek(foundUser -> {
+                    boolean status = subscriptionService.isFollowing(currentUsername, foundUser.getUsername());
+                    foundUser.setFollowing(status);
+                })
+                .toList();
+
+        return ResponseEntity.ok(filteredResults);
+    }
+
+    @GetMapping("/info/{username}")
+    public ResponseEntity<UserResponseDto> getUserInfo(
+            @PathVariable String username,
+            Authentication authentication) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        UserResponseDto userDto = new UserResponseDto(
+                user.getId(),
+                username,
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getAvatarUrl(),
+                false);
+
+        if (authentication != null) {
+            userDto.setFollowing(subscriptionService.isFollowing(authentication.getName(), username));
+        }
+
+        return ResponseEntity.ok(userDto);
     }
 }

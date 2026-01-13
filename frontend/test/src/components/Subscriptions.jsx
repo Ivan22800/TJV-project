@@ -1,12 +1,13 @@
 import { Input, Container, VStack, Group, HStack, Avatar, Button, Text, Box } from "@chakra-ui/react"
 import { LuSearch, LuCheck, LuUserPlus } from "react-icons/lu"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useContext } from "react"
+import { useUser } from "../context/UserContext";
 import { debounce } from "lodash";
+import { Link } from "react-router-dom";
+import { FollowingButton } from "./FollowingButton";
 
 
-function UserCard({ user }) {
-    const [following, setFollowing] = useState(user.isFollowing)
-
+export function UserCard({ user }) {
     return (
         <Box
             w="100%"
@@ -20,7 +21,13 @@ function UserCard({ user }) {
             borderColor="gray.100"
         >
             <HStack justify="space-between">
-                <HStack spacing={4}>
+                <HStack
+                    as={Link}
+                    to={`/feed/profile/${user.username}`}
+                    spacing={4}
+                    flex="1"
+                    _hover={{ textDecoration: "none" }}
+                >
                     <Avatar.Root size="lg">
                         <Avatar.Image src={user.avatar} />
                         <Avatar.Fallback name={user.name} />
@@ -31,31 +38,7 @@ function UserCard({ user }) {
                     </VStack>
                 </HStack>
 
-                <Button
-                    size="sm"
-                    width="100px"
-                    borderRadius="xl"
-                    variant={following ? "outline" : "solid"}
-                    colorScheme={following ? "gray" : "purple"}
-                    bg={following ? "transparent" : "purple.500"}
-                    color={following ? "gray.600" : "white"}
-                    borderColor={following ? "gray.300" : "transparent"}
-                    _hover={{
-                        bg: following ? "gray.50" : "purple.600",
-                        borderColor: following ? "gray.400" : "transparent"
-                    }}
-                    onClick={() => setFollowing(!following)}
-                >
-                    {following ? (
-                        <HStack gap={1}>
-                            <LuCheck /> <Text>Following</Text>
-                        </HStack>
-                    ) : (
-                        <HStack gap={1}>
-                            <LuUserPlus /> <Text>Follow</Text>
-                        </HStack>
-                    )}
-                </Button>
+                <FollowingButton targetUsername={user.username} initialFollowing={user.isFollowing} />
             </HStack>
         </Box>
     )
@@ -72,38 +55,57 @@ export default function Subscriptions() {
         user.username.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
+    const abortControllerRef = import.meta.env.SSR ? { current: null } : { current: null };
+
     const debouncedSearch = useCallback(
-    debounce((query) => {
-        fetch("http://localhost:8080/auth/users/search?query=" + query, {
-            headers: {
-                'Authorization': `Bearer ${token}` 
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            const formattedUsers = data.map(u => ({
-                id: u.id,
-                name: `${u.firstName} ${u.lastName}`, 
-                username: u.username,
-                avatar: u.avatarUrl ? `http://localhost:8080${u.avatarUrl}` : "https://bit.ly/broken-link", 
-                isFollowing: false 
-            }));
-            setUsers(formattedUsers);
-        });
-    }, 500),
-    []
-);
+        debounce((query, controller) => {
+            fetch("http://localhost:8080/api/users/search?query=" + query, {
+                signal: controller.signal,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const formattedUsers = data.map(u => ({
+                        id: u.id,
+                        name: `${u.firstName} ${u.lastName}`,
+                        username: u.username,
+                        avatar: u.avatarUrl ? `http://localhost:8080${u.avatarUrl}` : "https://bit.ly/broken-link",
+                        isFollowing: u.following
+                    }));
+                    setUsers(formattedUsers);
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') console.error(err);
+                });
+        }, 500),
+        [token]
+    );
 
     const handleSearch = (e) => {
         const value = e.target.value;
-        setSearchQuery(value); 
-        debouncedSearch(value); 
+        setSearchQuery(value);
+
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        if (value.trim() === "") {
+            debouncedSearch.cancel();
+            setUsers([]);
+            return;
+        }
+
+        const newController = new AbortController();
+        abortControllerRef.current = newController;
+
+        debouncedSearch(value, newController);
     };
 
     return (
-        <Container maxW="container.lg" py={6}>
+        <Box w="100%" px={0}>
             <VStack spacing={6} align="stretch">
-                <Box position="sticky" top={0} zIndex={10} pb={4} pt={2}>
+                <Box position="sticky" top={0} zIndex={10} pb={4} pt={0}>
                     <Group w="100%" size="lg">
                         <Box
                             position="absolute"
@@ -135,6 +137,6 @@ export default function Subscriptions() {
                     ))}
                 </VStack>
             </VStack>
-        </Container>
+        </Box>
     )
 }

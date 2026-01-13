@@ -31,6 +31,7 @@ public class User {
 
     @NotBlank(message = "Email cannot be empty")
     @Email(message = "Invalid email format")
+    @jakarta.validation.constraints.Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}$", message = "Email contains invalid characters")
     @Column(nullable = false, unique = true)
     private String email;
 

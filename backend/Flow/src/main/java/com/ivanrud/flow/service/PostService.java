@@ -8,6 +8,7 @@ import com.ivanrud.flow.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Service
@@ -65,5 +66,30 @@ public class PostService {
 
     public long getCountPostsByUsername(String username) {
         return postRepository.countByAuthor_Username(username);
+    }
+
+    public void deletePost(
+            Long postId,
+            String username)
+    {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        boolean isItUserPost = post.getAuthor().getUsername().equals(username);
+        if (isItUserPost) {
+            postRepository.delete(post);
+        }
+    }
+
+    public List<Post> getSubscriptionFeed(String username) {
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<Post> feedPosts = postRepository.findPostsByFollowedUsers(currentUser);
+
+        for (Post post : feedPosts) {
+            boolean liked = postLikeService.isPostLikedByUser(currentUser.getId(), post.getId());
+            post.setLikedByMe(liked);
+        }
+        return feedPosts;
     }
 }

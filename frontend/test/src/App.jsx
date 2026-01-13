@@ -10,6 +10,7 @@ import ProtectedRoute, { PublicRoute } from './components/ProtectedRoute';
 import { UserProvider } from './context/UserContext';
 import { Toaster } from './components/ui/toaster';
 import Subscriptions from './components/Subscriptions';
+import UserProfile from './components/UserProfile';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
                   <Route path="groups" element={<Groups />} />
                   <Route path="my-posts" element={<FeedMyPosts />} />
                   <Route path="subscriptions" element={<Subscriptions />} />
+                  <Route path="profile/:username" element={<UserProfile />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

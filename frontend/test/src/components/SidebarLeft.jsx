@@ -1,6 +1,6 @@
 import { Box, Button, VStack } from "@chakra-ui/react"
 import { MdRssFeed, MdOutlineGroup } from "react-icons/md";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { LiaUserFriendsSolid } from "react-icons/lia";
 
@@ -13,6 +13,7 @@ const menuItems = [
 
 export default function SidebarLeft() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const isActive = (path) =>
         location.pathname === path || (path === "/feed" && location.pathname === "/");
@@ -42,7 +43,9 @@ export default function SidebarLeft() {
                             bg={active ? "purple.50" : "transparent"}
                             _hover={{
                                 bg: active ? "purple.100" : "gray.100",
-                                color: active ? "purple.600" : "gray.700"
+                                color: active ? "purple.600" : "gray.700",
+                                transform: "translateY(-2px)",
+                                boxShadow: "md"
                             }}
                             _active={{
                                 bg: "purple.100",
@@ -63,6 +66,7 @@ export default function SidebarLeft() {
                     color="white"
                     _hover={{ bg: "purple.600" }}
                     borderRadius="xl"
+                    onClick={() => navigate("/feed", { state: { focusCreatePost: true } })}
                 >
                     Create Post
                 </Button>
