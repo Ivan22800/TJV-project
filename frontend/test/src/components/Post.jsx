@@ -1,15 +1,17 @@
-import { Box, Text, VStack, HStack, Separator, Avatar, Dialog, Portal, CloseButton, Input, Button } from "@chakra-ui/react"
+import { Box, Text, VStack, HStack, Separator, Avatar, Dialog, Portal, CloseButton, Button } from "@chakra-ui/react"
 import { useState } from "react";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
+import { LuTrash2 } from "react-icons/lu";
+import { useUser } from "../context/UserContext";
 
-
-
-export default function Post({ id, time, author, text, likesCount, likedByMe }) {
+export default function Post({ id, time, author, text, likesCount, likedByMe, onDelete }) {
+    const { user: currentUser } = useUser();
     const [likes, setLikes] = useState(likesCount || 0);
     const [liked, setLiked] = useState(likedByMe || false);
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState("");
+    const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const token = localStorage.getItem('token');
 
     function formatTime(timestamp) {
@@ -48,6 +50,26 @@ export default function Post({ id, time, author, text, likesCount, likedByMe }) 
         }
     };
 
+    const handleDelete = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/post/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setDeleteDialogOpen(false);
+                if (onDelete) onDelete(id);
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+        }
+    };
+
+    const isAuthor = currentUser?.username === author?.username;
+
     const addNewComment = () => {
         if (!commentText.trim()) return;
         const newComment = {
@@ -59,6 +81,7 @@ export default function Post({ id, time, author, text, likesCount, likedByMe }) 
         setComments([newComment, ...comments]);
         setCommentText("");
     };
+
     return (
         <Box
             flex="1"
@@ -83,57 +106,63 @@ export default function Post({ id, time, author, text, likesCount, likedByMe }) 
             </HStack>
             <Text fontSize="md" mt={3} whiteSpace="pre-wrap">{text}</Text>
             <Separator my={2} />
-            <HStack spacing={8} mt={2}>
-                <HStack spacing={2} cursor="pointer" onClick={handleLike}>
-                    {liked ? (
-                        <AiFillHeart color="#f472b6" size={22} />
-                    ) : (
-                        <AiOutlineHeart color="gray" size={22} />
-                    )}
-                    <Text fontWeight="medium">{likes}</Text>
+            <HStack justify="space-between" mt={2}>
+                <HStack spacing={8}>
+                    <HStack spacing={2} cursor="pointer" onClick={handleLike}>
+                        {liked ? (
+                            <AiFillHeart color="#f472b6" size={22} />
+                        ) : (
+                            <AiOutlineHeart color="gray" size={22} />
+                        )}
+                        <Text fontWeight="medium">{likes}</Text>
+                    </HStack>
                 </HStack>
 
-                <Dialog.Root>
-                    <Dialog.Trigger asChild>
-                        <HStack spacing={2} cursor="pointer">
-                            <BiCommentDetail color="gray" size={22} />
-                            <Text fontWeight="medium">0</Text>
-                        </HStack>
-                    </Dialog.Trigger>
-
-                    <Portal>
-                        <Dialog.Backdrop />
-                        <Dialog.Positioner>
-                            <Dialog.Content bg="white" borderRadius="xl" p={4} w={{ base: "90%", md: "600px" }}>
-                                <Dialog.Header fontWeight="bold">Comments</Dialog.Header>
-
-                                <Dialog.Body>
-                                    <VStack align="stretch" spacing={3}>
-                                        {/* Comments will be displayed here */}
-                                        <Text color="gray.500">No comments yet...</Text>
-                                        <HStack align="stretch" spacing={2} mt={4}>
-                                            <Input placeholder="Write a comment..." borderRadius="xl" onChange={e => setCommentText(e.target.value)} />
-                                            <Button
-                                                bg="purple.500"
-                                                color="white"
-                                                borderRadius="xl"
-                                                alignSelf="flex-end"
-                                                _hover={{ bg: "purple.600" }}
-                                                onClick={addNewComment}>
-                                                Post
-                                            </Button>
-                                        </HStack>
-                                    </VStack>
-                                </Dialog.Body>
-
-                                <Dialog.CloseTrigger asChild>
-                                    <CloseButton position="absolute" top="8px" right="8px" />
-                                </Dialog.CloseTrigger>
-                            </Dialog.Content>
-                        </Dialog.Positioner>
-                    </Portal>
-                </Dialog.Root>
+                {isAuthor && (
+                    <Dialog.Root placement="center" open={isDeleteDialogOpen} onOpenChange={(e) => setDeleteDialogOpen(e.open)}>
+                        <Dialog.Trigger asChild>
+                            <Box
+                                cursor="pointer"
+                                color="gray.400"
+                                _hover={{ color: "red.500" }}
+                                transition="all 0.2s"
+                            >
+                                <LuTrash2 size={18} />
+                            </Box>
+                        </Dialog.Trigger>
+                        <Portal>
+                            <Dialog.Backdrop />
+                            <Dialog.Positioner>
+                                <Dialog.Content borderRadius="xl">
+                                    <Dialog.Header>
+                                        <Dialog.Title>Delete post?</Dialog.Title>
+                                    </Dialog.Header>
+                                    <Dialog.Body>
+                                        Are you sure you want to delete this post? This action cannot be undone.
+                                    </Dialog.Body>
+                                    <Dialog.Footer>
+                                        <Dialog.ActionTrigger asChild>
+                                            <Button variant="outline" borderRadius="xl">Cancel</Button>
+                                        </Dialog.ActionTrigger>
+                                        <Button
+                                            onClick={handleDelete}
+                                            bg="red.500"
+                                            color="white"
+                                            _hover={{ bg: "red.600" }}
+                                            borderRadius="xl"
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Dialog.Footer>
+                                    <Dialog.CloseTrigger asChild>
+                                        <CloseButton size="sm" />
+                                    </Dialog.CloseTrigger>
+                                </Dialog.Content>
+                            </Dialog.Positioner>
+                        </Portal>
+                    </Dialog.Root>
+                )}
             </HStack>
         </Box>
-    )
+    );
 }

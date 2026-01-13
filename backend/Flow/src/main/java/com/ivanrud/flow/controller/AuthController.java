@@ -38,7 +38,6 @@ public class AuthController {
         try {
             System.out.println("Attempting to authenticate user: " + loginUserDTO.getUsername());
 
-            // Проверяем, существует ли пользователь
             if (!userRepository.existsByUsername(loginUserDTO.getUsername())) {
                 System.out.println("User not found: " + loginUserDTO.getUsername());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -83,7 +82,6 @@ public class AuthController {
                         .body("Error: Email is already registered!");
             }
 
-            // Create new user's account
             String encodedPassword = encoder.encode(registerRequest.getPassword());
             System.out.println("Registering user: " + registerRequest.getUsername());
             System.out.println("Password encoded, hash length: " + encodedPassword.length());
@@ -108,15 +106,13 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         try {
-            // Извлекаем токен из заголовка Authorization
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Missing or invalid authorization header");
             }
 
-            String token = authHeader.substring(7); // Убираем "Bearer "
+            String token = authHeader.substring(7);
 
-            // Проверяем и извлекаем username из токена
             if (!jwtUtils.validateJwtToken(token)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Invalid or expired token");
@@ -124,7 +120,6 @@ public class AuthController {
 
             String username = jwtUtils.getUsernameFromToken(token);
 
-            // Получаем пользователя по username
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -134,7 +129,8 @@ public class AuthController {
                     user.getEmail(),
                     user.getFirstName(),
                     user.getLastName(),
-                    user.getAvatarUrl());
+                    user.getAvatarUrl(),
+                    false);
 
             return ResponseEntity.ok(userResponse);
         } catch (Exception e) {

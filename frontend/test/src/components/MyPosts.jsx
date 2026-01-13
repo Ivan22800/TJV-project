@@ -1,14 +1,15 @@
-import { Box, Text, VStack, HStack, Separator } from "@chakra-ui/react"
-import { Avatar } from "@chakra-ui/react"
+import { Box, HStack, Avatar, Text, VStack, Separator, Dialog, CloseButton, Portal, Button } from "@chakra-ui/react"
 import { useState } from "react";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
+import { LuTrash2 } from "react-icons/lu";
+import { useUser } from "../context/UserContext";
 
-
-
-export default function Post({ id, time, author, text, likesCount, likedByMe }) {
+export default function Post({ id, time, author, text, likesCount, likedByMe, onDelete }) {
+    const { user: currentUser } = useUser();
     const [likes, setLikes] = useState(likesCount || 0);
     const [liked, setLiked] = useState(likedByMe || false);
+    const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const token = localStorage.getItem('token');
 
     function formatTime(timestamp) {
@@ -47,6 +48,26 @@ export default function Post({ id, time, author, text, likesCount, likedByMe }) 
         }
     };
 
+    const handleDelete = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/post/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setDeleteDialogOpen(false);
+                if (onDelete) onDelete(id);
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+        }
+    };
+
+    const isAuthor = currentUser?.username === author?.username;
+
     return (
         <Box
             flex="1"
@@ -70,20 +91,63 @@ export default function Post({ id, time, author, text, likesCount, likedByMe }) 
             </HStack>
             <Text fontSize="md" mt={3} whiteSpace="pre-wrap">{text}</Text>
             <Separator my={2} />
-            <HStack spacing={8} mt={2}>
-                <HStack spacing={2} cursor="pointer" onClick={handleLike}>
-                    {liked ? (
-                        <AiFillHeart color="#f472b6" size={22} />
-                    ) : (
-                        <AiOutlineHeart color="gray" size={22} />
-                    )}
-                    <Text fontWeight="medium">{likes}</Text>
+            <HStack justify="space-between" mt={2}>
+                <HStack spacing={8}>
+                    <HStack spacing={2} cursor="pointer" onClick={handleLike}>
+                        {liked ? (
+                            <AiFillHeart color="#f472b6" size={22} />
+                        ) : (
+                            <AiOutlineHeart color="gray" size={22} />
+                        )}
+                        <Text fontWeight="medium">{likes}</Text>
+                    </HStack>
                 </HStack>
-                <HStack spacing={2} cursor="pointer">
-                    <BiCommentDetail color="gray" size={22} />
-                    <Text fontWeight="medium">0</Text>
-                </HStack>
+
+                {isAuthor && (
+                    <Dialog.Root placement="center" open={isDeleteDialogOpen} onOpenChange={(e) => setDeleteDialogOpen(e.open)}>
+                        <Dialog.Trigger asChild>
+                            <Box
+                                cursor="pointer"
+                                color="gray.400"
+                                _hover={{ color: "red.500" }}
+                                transition="all 0.2s"
+                            >
+                                <LuTrash2 size={18} />
+                            </Box>
+                        </Dialog.Trigger>
+                        <Portal>
+                            <Dialog.Backdrop />
+                            <Dialog.Positioner>
+                                <Dialog.Content borderRadius="xl">
+                                    <Dialog.Header>
+                                        <Dialog.Title>Delete post?</Dialog.Title>
+                                    </Dialog.Header>
+                                    <Dialog.Body>
+                                        Are you sure you want to delete this post? This action cannot be undone.
+                                    </Dialog.Body>
+                                    <Dialog.Footer>
+                                        <Dialog.ActionTrigger asChild>
+                                            <Button variant="outline" borderRadius="xl">Cancel</Button>
+                                        </Dialog.ActionTrigger>
+                                        <Button
+                                            onClick={handleDelete}
+                                            bg="red.500"
+                                            color="white"
+                                            _hover={{ bg: "red.600" }}
+                                            borderRadius="xl"
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Dialog.Footer>
+                                    <Dialog.CloseTrigger asChild>
+                                        <CloseButton size="sm" />
+                                    </Dialog.CloseTrigger>
+                                </Dialog.Content>
+                            </Dialog.Positioner>
+                        </Portal>
+                    </Dialog.Root>
+                )}
             </HStack>
         </Box>
-    )
+    );
 }

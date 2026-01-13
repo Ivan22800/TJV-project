@@ -87,7 +87,8 @@ public class UserService {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getAvatarUrl());
+                user.getAvatarUrl(),
+                false);
     }
 
     public void changeUsername(String currentUsername, String newUsername) {
@@ -172,7 +173,8 @@ public class UserService {
                         u.getEmail(),
                         u.getFirstName(),
                         u.getLastName(),
-                        u.getAvatarUrl()
+                        u.getAvatarUrl(),
+                        false
                 )).toList();
     }
 
@@ -198,7 +200,8 @@ public class UserService {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getAvatarUrl());
+                user.getAvatarUrl(),
+                false);
     }
 
     public Optional<User> findByUsername(String username) {

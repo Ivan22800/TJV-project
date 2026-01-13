@@ -19,7 +19,7 @@ export default function NavBar() {
         <HStack spacing={8} alignItems="center">
           <HStack fontWeight="bold" fontSize="xl" color="teal.500" cursor="pointer" onClick={() => navigate('/feed')}>
             <Image src={logo} alt="Logo" boxSize="30px" />
-            <Box color="black">Flow</Box>
+            <Box color="#319795">Flow</Box>
           </HStack>
           <HStack as="nav" spacing={4} display={{ base: 'none', md: 'flex' }}>
           </HStack>

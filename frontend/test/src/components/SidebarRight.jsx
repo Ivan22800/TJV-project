@@ -1,6 +1,10 @@
-import { Box, Heading, VStack, HStack, Avatar, Text } from '@chakra-ui/react'
+import { Box, Heading, VStack, HStack, Avatar } from '@chakra-ui/react'
+import { Link, useLocation } from "react-router-dom";
+import { useUser } from '../context/UserContext';
 
 export default function SidebarRight() {
+    const { following } = useUser();
+
     return (
         <VStack align="stretch" spacing={3}>
             <Box
@@ -13,15 +17,17 @@ export default function SidebarRight() {
             >
                 <Heading fontSize={{ base: "md", md: "lg" }}>My Subscriptions</Heading>
                 <Box mt={2}>
-                    <HStack mb={1} spacing={3}>
-                        <Avatar.Root boxSize="30px">
-                            <Avatar.Fallback name="Segun Adebayo" />
-                            <Avatar.Image src="https://cdn4.iconfinder.com/data/icons/avatar-1-2/100/Avatar-16-512.png" />
-                        </Avatar.Root>
-                        <VStack align="start" spacing={0}>
-                            <Heading size="sm">Creative Coders</Heading>
-                        </VStack>
-                    </HStack>
+                    {following.map(subscription => (
+                        <HStack _hover={{ transform: "translateY(-1px)" }} key={subscription.id} mb={3} spacing={3} as={Link} to={`/feed/profile/${subscription.username}`}>
+                            <Avatar.Root boxSize="30px">
+                                <Avatar.Fallback name={subscription.username} />
+                                <Avatar.Image src={`http://localhost:8080${subscription.avatarUrl}`} />
+                            </Avatar.Root>
+                            <VStack align="start" spacing={0}>
+                                <Heading size="sm">{subscription.username}</Heading>
+                            </VStack>
+                        </HStack>
+                    ))}
                 </Box>
             </Box>
         </VStack>

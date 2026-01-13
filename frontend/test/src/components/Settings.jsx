@@ -83,7 +83,7 @@ export default function Settings() {
     const handlePasswordChange = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/auth/${user.username}/change-password`, {
+            const response = await fetch(`http://localhost:8080/api/users/${user.username}/change-password`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -112,9 +112,19 @@ export default function Settings() {
     };
 
     const handleProfileUpdate = async () => {
+        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[a-z]{2,}$/;
+        if (!emailRegex.test(formData.email)) {
+            toaster.create({
+                title: 'Invalid email',
+                description: 'Please enter a valid email address without special characters like ^ or ʼ',
+                type: 'error',
+            });
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/auth/${user.username}/update-profile`, {
+            const response = await fetch(`http://localhost:8080/api/users/${user.username}/update-profile`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -157,7 +167,7 @@ export default function Settings() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/auth/${user.username}/upload-avatar`, {
+            const response = await fetch(`http://localhost:8080/api/users/${user.username}/upload-avatar`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -230,8 +240,8 @@ export default function Settings() {
                         <Tabs.Root defaultValue="profile" variant="line">
                             <Tabs.List>
                                 <Tabs.Trigger value="profile">Profile</Tabs.Trigger>
-                                <Tabs.Trigger value="privacy">Privacy</Tabs.Trigger>
-                                <Tabs.Trigger value="notifications">Notifications</Tabs.Trigger>
+                                {/* <Tabs.Trigger value="privacy">Privacy</Tabs.Trigger>
+                                <Tabs.Trigger value="notifications">Notifications</Tabs.Trigger> */}
                             </Tabs.List>
                             <Tabs.Content value="profile">
                                 <HStack spacing={4}>

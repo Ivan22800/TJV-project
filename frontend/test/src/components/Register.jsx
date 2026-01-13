@@ -19,6 +19,16 @@ export default function Register() {
         const username = document.querySelector('input[name="username"]').value;
         const password = document.querySelector('input[name="password"]').value;
 
+        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[a-z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            toaster.create({
+                title: 'Invalid email',
+                description: 'Please enter a valid email address without special characters like ^ or ʼ',
+                type: 'error',
+            });
+            return;
+        }
+
         fetch('http://localhost:8080/api/auth/signup', {
             method: 'POST',
             headers: {
@@ -53,19 +63,19 @@ export default function Register() {
             .then(message => {
                 console.log('Success:', message);
                 toaster.create({
-                        title: 'Registration successful',
-                        description: 'You have successfully registered!',
-                        type: 'success',
-                    })
+                    title: 'Registration successful',
+                    description: 'You have successfully registered!',
+                    type: 'success',
+                })
                 navigate('/login');
             })
             .catch((error) => {
                 console.error('Error:', error.message);
                 toaster.create({
-                        title: 'Registration failed',
-                        description: error.message || 'Registration failed',
-                        type: 'error',
-                    })
+                    title: 'Registration failed',
+                    description: error.message || 'Registration failed',
+                    type: 'error',
+                })
             });
     }
 

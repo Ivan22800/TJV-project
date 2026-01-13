@@ -54,17 +54,6 @@ npm run dev
 ```
 The application will open at: `http://localhost:5173`
 
----
-
-## 🔄 Recent Updates (Refactoring)
-
-The project has undergone a significant architectural improvement:
-- **DTO Layer**: Implemented Data Transfer Objects (DTOs) to completely decouple database entities from the client interface.
-- **Security**: Fixed post mapping issues, ensuring author data and timestamps are transmitted securely and correctly.
-- **UX**: Improved notification system — replaced default browser alerts with Chakra UI Toasters.
-- **Validation**: Added server-side checks for all forms (registration, post creation).
-
----
 
 ## 📝 Authors
 - [Ivan](https://github.com/Ivan22800)
